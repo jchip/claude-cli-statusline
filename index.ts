@@ -209,6 +209,30 @@ if (saveSampleArg) {
   }
 }
 
+// Parse context level thresholds from --context-levels flag
+// Default: green > 65%, yellow 45-65%, orange 20-45%, red < 20%
+let greenThreshold = 65;
+let yellowThreshold = 45;
+let orangeThreshold = 20;
+
+const contextLevelsArg = process.argv.find(arg => arg.startsWith("--context-levels="));
+if (contextLevelsArg) {
+  try {
+    const values = contextLevelsArg.split("=")[1].split(",").map(v => parseInt(v.trim()));
+    if (values.length === 3 && values.every(v => !isNaN(v) && v >= 0 && v <= 100)) {
+      const [green, yellow, orange] = values;
+      // Ensure they are in descending order
+      if (green > yellow && yellow > orange) {
+        greenThreshold = green;
+        yellowThreshold = yellow;
+        orangeThreshold = orange;
+      }
+    }
+  } catch {
+    // Ignore parsing errors, use defaults
+  }
+}
+
 const model = input?.model?.display_name || input?.model?.id || "model";
 const cwd = input?.workspace?.current_dir || ".";
 const root = input?.workspace?.project_dir || cwd;
@@ -260,11 +284,11 @@ const colors = {
 let ctxDisplay: string;
 if (pct !== null && isFinite(pct)) {
   const pctRounded = Math.round(pct);
-  // Choose color based on remaining percentage
+  // Choose color based on remaining percentage and thresholds
   let color: string;
-  if (pctRounded > 65) color = colors.green; // plenty left
-  else if (pctRounded >= 45) color = colors.yellow; // moderate
-  else if (pctRounded >= 20) color = colors.orange; // getting low
+  if (pctRounded > greenThreshold) color = colors.green; // plenty left
+  else if (pctRounded >= yellowThreshold) color = colors.yellow; // moderate
+  else if (pctRounded >= orangeThreshold) color = colors.orange; // getting low
   else color = colors.red; // almost full
 
   ctxDisplay = `⏬ ${color}${pctRounded}%${colors.reset}`;

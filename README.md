@@ -41,6 +41,58 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 - 🟠 Orange: 20-45% remaining
 - 🔴 Red: <20% remaining
 
+## Options
+
+You can pass options to customize the statusline behavior:
+
+### `--context-levels=green,yellow,orange`
+
+Customize the color thresholds for context usage display. Values must be integers between 0-100 and in descending order.
+
+**Default:** `--context-levels=65,45,20`
+
+**Example:**
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bun ~/claude-cli-statusline/index.ts --context-levels=75,50,25"
+  }
+}
+```
+
+This sets:
+- Green: >75% remaining
+- Yellow: 50-75% remaining
+- Orange: 25-50% remaining
+- Red: <25% remaining
+
+### `--save-sample[=filename]`
+
+Save the input JSON to a file for debugging purposes.
+
+**Default filename:** `sample-input.json`
+
+**Example:**
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bun ~/claude-cli-statusline/index.ts --save-sample"
+  }
+}
+```
+
+Or with custom filename:
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bun ~/claude-cli-statusline/index.ts --save-sample=debug.json"
+  }
+}
+```
+
 ## How it works
 
 The script calculates context usage by:
