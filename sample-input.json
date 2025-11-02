@@ -1,0 +1,25 @@
+{
+  "session_id": "e8f805da-edaa-4b03-aa37-b0759810d424",
+  "transcript_path": "/Users/jc/.claude/projects/-Users-jc-dev-claude-cli-statusline/e8f805da-edaa-4b03-aa37-b0759810d424.jsonl",
+  "cwd": "/Users/jc/dev/claude-cli-statusline",
+  "model": {
+    "id": "claude-sonnet-4-5-20250929",
+    "display_name": "Sonnet 4.5"
+  },
+  "workspace": {
+    "current_dir": "/Users/jc/dev/claude-cli-statusline",
+    "project_dir": "/Users/jc/dev/claude-cli-statusline"
+  },
+  "version": "2.0.28",
+  "output_style": {
+    "name": "default"
+  },
+  "cost": {
+    "total_cost_usd": 0.2972474,
+    "total_duration_ms": 417086,
+    "total_api_duration_ms": 97155,
+    "total_lines_added": 97,
+    "total_lines_removed": 20
+  },
+  "exceeds_200k_tokens": false
+}

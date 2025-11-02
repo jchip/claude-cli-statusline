@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Claude Code statusline (macOS + Bun, no ccusage)
+ * Claude Code statusline
  * Displays: model · root dir · relative cwd · git branch · context remaining %
  *
  * Strategy to get context %:
@@ -10,8 +10,8 @@
  */
 
 import { spawnSync } from "bun";
-import { readFileSync } from "fs";
-import { basename } from "path";
+import { readFileSync, existsSync } from "fs";
+import { basename, join } from "path";
 
 // ----- helpers -----
 function shortenHome(path: string): string {
@@ -132,20 +132,46 @@ function findPercentRecursive(o: any, depth = 0): number | null {
   return null;
 }
 
-// Model context windows (in tokens)
-const MODEL_CONTEXT_WINDOWS: Record<string, number> = {
-  "claude-sonnet-4-5-20250929": 200000,
-  "claude-sonnet-4-20250514": 200000,
-  "claude-opus-4-20250514": 200000,
-  "claude-3-5-sonnet-20241022": 200000,
-  "claude-3-5-sonnet-20240620": 200000,
-  "claude-3-opus-20240229": 200000,
-  "claude-3-sonnet-20240229": 200000,
-  "claude-3-haiku-20240307": 200000,
-};
+// Load configuration
+interface Config {
+  "context-color-levels": [number, number, number];
+  "model-context-windows": Record<string, number>;
+}
+
+function loadConfig(): Config {
+  const configPath = join(import.meta.dir, "config.json");
+  const defaultConfig: Config = {
+    "context-color-levels": [65, 45, 20],
+    "model-context-windows": {
+      "claude-sonnet-4-5-20250929": 200000,
+      "claude-sonnet-4-20250514": 200000,
+      "claude-opus-4-20250514": 200000,
+      "claude-3-5-sonnet-20241022": 200000,
+      "claude-3-5-sonnet-20240620": 200000,
+      "claude-3-opus-20240229": 200000,
+      "claude-3-sonnet-20240229": 200000,
+      "claude-3-haiku-20240307": 200000,
+    }
+  };
+
+  if (existsSync(configPath)) {
+    try {
+      const configData = JSON.parse(readFileSync(configPath, "utf8"));
+      return {
+        "context-color-levels": configData["context-color-levels"] || defaultConfig["context-color-levels"],
+        "model-context-windows": configData["model-context-windows"] || defaultConfig["model-context-windows"]
+      };
+    } catch {
+      return defaultConfig;
+    }
+  }
+  return defaultConfig;
+}
+
+const config = loadConfig();
 
 function getModelContextWindow(modelId: string): number {
-  return MODEL_CONTEXT_WINDOWS[modelId] || 200000; // default to 200k
+  return config["model-context-windows"][modelId] || 200000; // default to 200k
 }
 
 function tryFromTranscript(transcriptPath: string | undefined, modelId?: string): number | null {
@@ -209,12 +235,11 @@ if (saveSampleArg) {
   }
 }
 
-// Parse context level thresholds from --context-levels flag
+// Get context level thresholds from config, can be overridden by CLI flag
 // Default: green > 65%, yellow 45-65%, orange 20-45%, red < 20%
-let greenThreshold = 65;
-let yellowThreshold = 45;
-let orangeThreshold = 20;
+let [greenThreshold, yellowThreshold, orangeThreshold] = config["context-color-levels"];
 
+// CLI flag overrides config
 const contextLevelsArg = process.argv.find(arg => arg.startsWith("--context-levels="));
 if (contextLevelsArg) {
   try {
@@ -229,7 +254,7 @@ if (contextLevelsArg) {
       }
     }
   } catch {
-    // Ignore parsing errors, use defaults
+    // Ignore parsing errors, use config values
   }
 }
 

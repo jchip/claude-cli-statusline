@@ -93,6 +93,44 @@ Or with custom filename:
 }
 ```
 
+## Config
+
+You can create a `config.json` file in the same directory as `index.ts` to customize default settings:
+
+```json
+{
+  "context-color-levels": [65, 45, 20],
+  "model-context-windows": {
+    "claude-sonnet-4-5-20250929": 200000,
+    "claude-sonnet-4-20250514": 200000,
+    "claude-opus-4-20250514": 200000,
+    "claude-3-5-sonnet-20241022": 200000,
+    "claude-3-5-sonnet-20240620": 200000,
+    "claude-3-opus-20240229": 200000,
+    "claude-3-sonnet-20240229": 200000,
+    "claude-3-haiku-20240307": 200000
+  }
+}
+```
+
+### `context-color-levels`
+
+An array of three descending integers [green, yellow, orange] that define the thresholds for context remaining percentage:
+- First value: minimum % for green (default: 65)
+- Second value: minimum % for yellow (default: 45)
+- Third value: minimum % for orange (default: 20)
+- Below third value: red
+
+**Note:** CLI flag `--context-levels` overrides these config values.
+
+### `model-context-windows`
+
+A mapping of model IDs to their context window sizes in tokens. This is used to calculate the remaining context percentage from the transcript usage data.
+
+Add entries here if you need to support additional models or if Claude releases models with different context windows.
+
+**Default:** 200,000 tokens for unknown models
+
 ## How it works
 
 The script calculates context usage by:
