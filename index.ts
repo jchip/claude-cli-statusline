@@ -305,6 +305,18 @@ const colors = {
   reset: "\x1b[0m",
 };
 
+// Helper to format token count in human-readable format
+function formatTokenCount(tokens: number): string {
+  if (tokens >= 1000000) {
+    const m = tokens / 1000000;
+    return m % 1 === 0 ? `${m}M` : `${m.toFixed(2)}M`;
+  } else if (tokens >= 1000) {
+    const k = tokens / 1000;
+    return k % 1 === 0 ? `${k}K` : `${k.toFixed(2)}K`;
+  }
+  return `${tokens}`;
+}
+
 // format with visual indicator
 let ctxDisplay: string;
 if (pct !== null && isFinite(pct)) {
@@ -316,7 +328,11 @@ if (pct !== null && isFinite(pct)) {
   else if (pctRounded >= orangeThreshold) color = colors.orange; // getting low
   else color = colors.red; // almost full
 
-  ctxDisplay = `⏬ ${color}${pctRounded}%${colors.reset}`;
+  // Get the max context window for the current model
+  const maxTokens = getModelContextWindow(input?.model?.id || "");
+  const maxDisplay = formatTokenCount(maxTokens);
+
+  ctxDisplay = `⏬ ${color}${pctRounded}%${colors.reset} ${maxDisplay}`;
 } else {
   ctxDisplay = "⏬ —";
 }

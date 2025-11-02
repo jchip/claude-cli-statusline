@@ -6,7 +6,7 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 
 1. Ensure you have [Bun](https://bun.sh) installed
 2. Clone or copy this repo to your home directory (e.g., `~/claude-cli-statusline`)
-3. Add to your Claude config (`~/.claude/config.json` or your project's `.claude/config.json`):
+3. Add to your Claude config (`~/.claude/settings.json` or your project's `.claude/settings.json`):
 
 ```json
 {
@@ -22,10 +22,11 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 ## What it shows
 
 ```
-📦 ~/path/to/root › 📁 relative/dir 🐙 📦 ⎇ branch 🧠 Model ⏬ 52%
+📦 ~/path/to/root › 📁 relative/dir 🐙 📦 ⎇ branch 🧠 Model ⏬ 52% 200K
 ```
 
 **Icons:**
+
 - 📦 Project root directory
 - 📁 Current relative directory
 - 🐙 📦 Git repo (octopus + box when repo name matches root directory)
@@ -33,9 +34,10 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 - ⎇ Git branch (🟢 green if in repo, 🟡 yellow if no repo)
 - ∅ No git repository
 - 🧠 Model name
-- ⏬ Context remaining (color-coded percentage)
+- ⏬ Context remaining (color-coded percentage + max context window)
 
 **Context Colors:**
+
 - 🟢 Green: >65% remaining
 - 🟡 Yellow: 45-65% remaining
 - 🟠 Orange: 20-45% remaining
@@ -52,6 +54,7 @@ Customize the color thresholds for context usage display. Values must be integer
 **Default:** `--context-levels=65,45,20`
 
 **Example:**
+
 ```json
 {
   "statusLine": {
@@ -62,6 +65,7 @@ Customize the color thresholds for context usage display. Values must be integer
 ```
 
 This sets:
+
 - Green: >75% remaining
 - Yellow: 50-75% remaining
 - Orange: 25-50% remaining
@@ -74,6 +78,7 @@ Save the input JSON to a file for debugging purposes.
 **Default filename:** `sample-input.json`
 
 **Example:**
+
 ```json
 {
   "statusLine": {
@@ -84,6 +89,7 @@ Save the input JSON to a file for debugging purposes.
 ```
 
 Or with custom filename:
+
 ```json
 {
   "statusLine": {
@@ -116,6 +122,7 @@ You can create a `config.json` file in the same directory as `index.ts` to custo
 ### `context-color-levels`
 
 An array of three descending integers [green, yellow, orange] that define the thresholds for context remaining percentage:
+
 - First value: minimum % for green (default: 65)
 - Second value: minimum % for yellow (default: 45)
 - Third value: minimum % for orange (default: 20)
@@ -142,6 +149,7 @@ The script calculates context usage by:
 5. Displaying the remaining percentage with color-coded visual indicators
 
 **Supported Models:**
+
 - Claude Sonnet 4.5 (200k context)
 - Claude Opus 4 (200k context)
 - Claude 3.5 Sonnet (200k context)
@@ -167,6 +175,7 @@ Edit your Claude config to use the debug script:
 ### Step 2: Run Claude CLI
 
 Start a Claude CLI session and observe the debug output. It will show:
+
 - The complete JSON structure passed to the statusline
 - Whether a `budget` field exists
 - The transcript file path
@@ -180,6 +189,7 @@ cat /path/to/transcript.json | jq .
 ```
 
 Look for fields like:
+
 - `usage`
 - `metadata`
 - `budget`
@@ -189,6 +199,7 @@ Look for fields like:
 ### Step 4: Update the field names
 
 If you find token usage data in a different location, update `index.ts` to include those field names in the appropriate arrays:
+
 - `maxKeys` - for maximum token limits
 - `usedKeys` - for tokens used
 - `remainingKeys` - for tokens remaining
