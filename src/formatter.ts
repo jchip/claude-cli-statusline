@@ -34,12 +34,12 @@ export function formatContextDisplay(
   const pctRounded = Math.round(pct);
   const [greenThreshold, yellowThreshold, orangeThreshold] = thresholds;
 
-  // Choose color based on remaining percentage and thresholds
-  let color: string;
-  if (pctRounded > greenThreshold) color = colors.green;
-  else if (pctRounded >= yellowThreshold) color = colors.yellow;
-  else if (pctRounded >= orangeThreshold) color = colors.orange;
-  else color = colors.red;
+  // Choose color for first percentage (total remaining)
+  let color1: string;
+  if (pctRounded > greenThreshold) color1 = colors.green;
+  else if (pctRounded >= yellowThreshold) color1 = colors.yellow;
+  else if (pctRounded >= orangeThreshold) color1 = colors.orange;
+  else color1 = colors.red;
 
   const { tokens: maxTokens, source } = getModelContextWindow(
     config,
@@ -58,8 +58,15 @@ export function formatContextDisplay(
     Math.round((tokensUntilCompact / maxTokens) * 100)
   );
 
+  // Choose color for second percentage (until compact) - independently colored
+  let color2: string;
+  if (pctUntilCompact > greenThreshold) color2 = colors.green;
+  else if (pctUntilCompact >= yellowThreshold) color2 = colors.yellow;
+  else if (pctUntilCompact >= orangeThreshold) color2 = colors.orange;
+  else color2 = colors.red;
+
   // Show dual percentage: total remaining ✦ until compact 💫 max
-  return `⏬ ${color}${pctRounded}%${colors.reset}✦${color}${pctUntilCompact}%${colors.reset}💫${maxDisplay}`;
+  return `⏬ ${color1}${pctRounded}%${colors.reset}✦${color2}${pctUntilCompact}%${colors.reset}💫${maxDisplay}`;
 }
 
 /**
