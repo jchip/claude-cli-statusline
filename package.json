@@ -1,6 +1,6 @@
 {
   "name": "claude-cli-statusline",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A bun TypeScript statusline for Claude CLI with color-coded context usage indicators",
   "main": "index.ts",
   "type": "module",
@@ -28,6 +28,14 @@
     "xAI Grok Code Fast 1"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jchip/claude-cli-statusline.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jchip/claude-cli-statusline/issues"
+  },
+  "homepage": "https://github.com/jchip/claude-cli-statusline#readme",
   "engines": {
     "bun": ">=1.0.0"
   },

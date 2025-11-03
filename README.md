@@ -5,6 +5,22 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 ## Installation
 
 1. Ensure you have [Bun](https://bun.sh) installed
+
+### `bunx` and npm package
+
+2. Add to your Claude config (`~/.claude/settings.json` or your project's `.claude/settings.json`):
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bunx claude-cli-statusline"
+  }
+}
+```
+
+### Manually Clone/Copy
+
 2. Clone or copy this repo to your home directory (e.g., `~/claude-cli-statusline`)
 3. Add to your Claude config (`~/.claude/settings.json` or your project's `.claude/settings.json`):
 

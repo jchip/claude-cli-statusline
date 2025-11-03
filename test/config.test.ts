@@ -38,39 +38,58 @@ describe("config", () => {
     });
 
     it("should load config from project .claude directory", () => {
-      const claudeDir = join(testDir, ".claude");
-      mkdirSync(claudeDir);
-      const configPath = join(claudeDir, "statusline-config.json");
-      const customConfig = {
-        "model-context-windows": {
-          "test-model": 100000,
-        },
-      };
-      writeFileSync(configPath, JSON.stringify(customConfig));
+      const projectDir = "/tmp/project-test";
+      const claudeDir = join(projectDir, ".claude");
 
-      const config = loadConfig(testDir);
-      expect(config["model-context-windows"]["test-model"]).toBe(100000);
+      // Create project directory and .claude subdirectory
+      mkdirSync(claudeDir, { recursive: true });
+
+      try {
+        const configPath = join(claudeDir, "statusline-config.json");
+        const customConfig = {
+          "model-context-windows": {
+            "test-model": 100000,
+          },
+        };
+        writeFileSync(configPath, JSON.stringify(customConfig));
+
+        const config = loadConfig(projectDir);
+        expect(config["model-context-windows"]["test-model"]).toBe(100000);
+      } finally {
+        // Cleanup project directory
+        rmSync(projectDir, { recursive: true, force: true });
+      }
     });
 
     it("should load config from user home .claude directory", () => {
-      const home = process.env.HOME || "/tmp";
-      const claudeDir = join(home, ".claude");
-      mkdirSync(claudeDir, { recursive: true });
-      const configPath = join(claudeDir, "statusline-config.json");
-      const customConfig = {
-        "save-sample": {
-          enable: true,
-          filename: "custom-sample.json",
-        },
-      };
-      writeFileSync(configPath, JSON.stringify(customConfig));
+      // Use a temporary directory instead of actual home directory
+      const tempHome = "/tmp/test-home";
+      const originalHome = process.env.HOME;
 
-      const config = loadConfig();
-      expect(config["save-sample"].enable).toBe(true);
-      expect(config["save-sample"].filename).toBe("custom-sample.json");
+      // Create temp home directory
+      mkdirSync(tempHome, { recursive: true });
+      process.env.HOME = tempHome;
 
-      // Cleanup
-      rmSync(claudeDir, { recursive: true, force: true });
+      try {
+        const claudeDir = join(tempHome, ".claude");
+        mkdirSync(claudeDir, { recursive: true });
+        const configPath = join(claudeDir, "statusline-config.json");
+        const customConfig = {
+          "save-sample": {
+            enable: true,
+            filename: "custom-sample.json",
+          },
+        };
+        writeFileSync(configPath, JSON.stringify(customConfig));
+
+        const config = loadConfig();
+        expect(config["save-sample"].enable).toBe(true);
+        expect(config["save-sample"].filename).toBe("custom-sample.json");
+      } finally {
+        // Restore original HOME and cleanup
+        process.env.HOME = originalHome;
+        rmSync(tempHome, { recursive: true, force: true });
+      }
     });
 
     it("should merge config with defaults", () => {
