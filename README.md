@@ -22,7 +22,7 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 ## What it shows
 
 ```
-📦 ~/path/to/root › 📁 relative/dir 🐙 📦 ⎇ branch 🧠 Model ⏬ 52% 200K
+📦 ~/path/to/root › 📁 relative/dir 🐙 📦 ⎇ branch 🧠 Model 60%✦15%💫200K
 ```
 
 **Icons:**
@@ -34,7 +34,12 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 - ⎇ Git branch (🟢 green if in repo, 🟡 yellow if no repo)
 - ∅ No git repository
 - 🧠 Model name
-- ⏬ Context remaining (color-coded percentage + max context window)
+- Context display: `60%✦15%💫200K`
+  - First percentage (60%): Total remaining context
+  - ✦ separator
+  - Second percentage (15%): Remaining before auto-compact
+  - 💫 separator
+  - Max context window (200K)
 
 **Context Colors:**
 
@@ -101,7 +106,13 @@ Or with custom filename:
 
 ## Config
 
-You can create a `config.json` file in the same directory as `index.ts` to customize default settings:
+Configuration files are loaded in order of precedence:
+
+1. **Project config**: `.claude/statusline-config.json` in your workspace project directory (from `workspace.project_dir`)
+2. **User config**: `~/.claude/statusline-config.json` in your home directory
+3. **Script config**: `config.json` in the statusline script directory
+
+**The config is reloaded on every statusline update**, so you can modify it while Claude CLI is running:
 
 ```json
 {
@@ -115,9 +126,27 @@ You can create a `config.json` file in the same directory as `index.ts` to custo
     "claude-3-opus-20240229": 200000,
     "claude-3-sonnet-20240229": 200000,
     "claude-3-haiku-20240307": 200000
+  },
+  "compact-buffer": 45000,
+  "save-sample": {
+    "enable": false,
+    "filename": "sample-input.json"
   }
 }
 ```
+
+### `compact-buffer`
+
+The number of tokens to reserve as a buffer before auto-compact. Claude CLI automatically compacts the conversation when remaining tokens reach this threshold.
+
+**Default:** `45000` tokens
+
+This setting affects the second percentage in the display (e.g., `60%|15%`):
+
+- First percentage: Total remaining context (60% = 120K tokens remaining)
+- Second percentage: Remaining before auto-compact (15% = 30K tokens until compact at 45K buffer)
+
+When the second percentage reaches 0%, Claude CLI will auto-compact the conversation, which resets the context and may cause the percentages to jump back up.
 
 ### `context-color-levels`
 
@@ -137,6 +166,87 @@ A mapping of model IDs to their context window sizes in tokens. This is used to 
 Add entries here if you need to support additional models or if Claude releases models with different context windows.
 
 **Default:** 200,000 tokens for unknown models
+
+## Performance Optimizations
+
+### Transcript Caching
+
+The statusline automatically caches transcript analysis results in a `.statusline` directory next to the transcript file. This provides:
+
+- **Incremental updates**: Only new lines are analyzed on each run
+- **Fast startup**: Cached results are reused when the transcript hasn't changed
+- **Automatic invalidation**: Cache is cleared when the transcript file is modified
+
+The cache stores:
+
+- Last analyzed line number
+- Last token count
+- Transcript modification time
+- Complete history of all analyzed entries (line number + token count)
+
+This history allows for:
+
+- Detecting auto-compact events (sudden drops in token count)
+- Analyzing token usage patterns over time
+- Debugging context issues
+
+This makes the statusline extremely fast even with large transcript files (1MB+).
+
+### Config File Hierarchy
+
+You can place configuration files at different levels:
+
+**Project-level** (`.claude/statusline-config.json`):
+
+```bash
+cd /path/to/your/project
+mkdir -p .claude
+cat > .claude/statusline-config.json << 'EOF'
+{
+  "context-color-levels": [70, 50, 25],
+  "save-sample": {
+    "enable": true,
+    "filename": "debug-input.json"
+  }
+}
+EOF
+```
+
+**User-level** (`~/.claude/statusline-config.json`):
+
+```bash
+mkdir -p ~/.claude
+cat > ~/.claude/statusline-config.json << 'EOF'
+{
+  "context-color-levels": [65, 45, 20],
+  "model-context-windows": {
+    "claude-sonnet-4-5-20250929": 200000
+  }
+}
+EOF
+```
+
+This allows you to have different settings per project while maintaining user-wide defaults.
+
+### `save-sample`
+
+An object to control saving the input JSON on every statusline update. Useful for debugging or analyzing the data structure Claude CLI provides.
+
+**Properties:**
+
+- `enable` (boolean): Enable/disable sample saving
+- `filename` (string): The filename to use when saving
+
+**Default:**
+
+```json
+{
+  "enable": false,
+  "filename": "sample-input.json"
+}
+```
+
+**Note:** You can change `enable` to `true` while Claude CLI is running, and the next statusline update will start saving samples. The CLI flag `--save-sample[=filename]` overrides these config values.
 
 ## How it works
 
