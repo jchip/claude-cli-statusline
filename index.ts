@@ -17,9 +17,7 @@ async function main() {
 
   // Parse --config CLI flag (if specified, use it; otherwise use default)
   const configArg = process.argv.find((arg) => arg.startsWith("--config="));
-  const configFile = configArg
-    ? configArg.split("=")[1]
-    : "statusline-config.json";
+  const configFile = configArg?.split("=")[1] || "statusline-config.json";
 
   // Load config fresh on each run (allows dynamic changes)
   const projectDir = input?.workspace?.project_dir;
