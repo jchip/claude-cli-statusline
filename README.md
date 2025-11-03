@@ -43,13 +43,13 @@ Or with a custom config file:
 - 🐙 📦 Git repo (octopus + box when repo name matches root directory)
 - 🐙 repo-name Git repo (octopus + name when repo name differs from root)
 - ⎇ Git branch (🟢 green if in repo, 🟡 yellow if no repo)
-- ∅ No git repository
+  - ∅ No git repository
 - 🧠 Model name
-- ⏬ Context display: `89%✦67%💫200K`
+- ⏬ Context display: `89%✦67%⚡️200K`
   - First percentage (89%): Total remaining context
   - ✦ separator
   - Second percentage (67%): Remaining before auto-compact
-  - 💫 separator
+  - ⚡️ separator or 💫 if context was compacted (auto or manual)
   - Max context window (200K) - configurable in config file
 
 **Context Colors:**
@@ -248,17 +248,19 @@ The cache stores:
 - Transcript modification time
 - Complete history of all analyzed entries (line number + token count)
 - **Statusline input data** (the complete JSON input from Claude CLI)
+- **Statusline output string** (the formatted statusline that was displayed)
 
 This comprehensive cache allows for:
 
 - **Detecting auto-compact events** (sudden drops in token count)
 - **Analyzing token usage patterns** over time
 - **Debugging context issues** with full input data
+- **Debugging display issues** with the actual output string
 - **Eliminating need for separate sample files** - the cache includes everything
 
 Cache location: `~/.claude/projects/<project>/.statusline/<session-id>.jsonl.cache.json`
 
-This makes the statusline extremely fast even with large transcript files (1MB+), while providing complete debugging information.
+This makes the statusline extremely fast even with large transcript files (1MB+), while providing complete debugging information including the exact output that was displayed.
 
 ### Config File Hierarchy
 

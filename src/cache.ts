@@ -15,6 +15,9 @@ interface LineEntry {
   line: number;
   tokens: number;
   timestamp?: number;
+  isCompact?: boolean;
+  compactTrigger?: "manual" | "auto";
+  preCompactTokens?: number;
 }
 
 interface CacheData {
@@ -23,6 +26,7 @@ interface CacheData {
   lastModified: number;
   entries: LineEntry[];
   "statusline-input"?: any;
+  "statusline-output"?: string;
 }
 
 /**
@@ -74,7 +78,8 @@ export function writeCache(
   lastLine: number,
   lastTokenCount: number,
   entries: LineEntry[],
-  statuslineInput?: any
+  statuslineInput?: any,
+  statuslineOutput?: string
 ): void {
   try {
     const cacheDir = getCacheDir(transcriptPath);
@@ -93,6 +98,7 @@ export function writeCache(
       lastModified: transcriptStat.mtimeMs,
       entries,
       "statusline-input": statuslineInput,
+      "statusline-output": statuslineOutput,
     };
 
     writeFileSync(cachePath, JSON.stringify(cache, null, 2));

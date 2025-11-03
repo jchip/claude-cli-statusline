@@ -73,8 +73,13 @@ async function main() {
     }
   }
 
-  // Get context percentage and used tokens
-  const { percentage: pct, usedTokens } = getContextInfo(config, input);
+  // Get context percentage, used tokens, compact status, and cache saver
+  const {
+    percentage: pct,
+    usedTokens,
+    compactOccurred,
+    saveCache,
+  } = getContextInfo(config, input);
 
   // Format and output statusline
   const statusLine = formatStatusLine(
@@ -82,8 +87,12 @@ async function main() {
     input,
     pct,
     [greenThreshold, yellowThreshold, orangeThreshold],
-    usedTokens
+    usedTokens,
+    compactOccurred
   );
+
+  // Save the statusline output to cache for debugging
+  saveCache(statusLine);
 
   console.log(statusLine);
 }

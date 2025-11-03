@@ -25,7 +25,8 @@ export function formatContextDisplay(
   modelId: string,
   displayName: string,
   thresholds: [number, number, number],
-  usedTokens: number
+  usedTokens: number,
+  compactOccurred: boolean
 ): string {
   if (pct === null || !isFinite(pct)) {
     return "💤";
@@ -65,8 +66,9 @@ export function formatContextDisplay(
   else if (pctUntilCompact >= orangeThreshold) color2 = colors.orange;
   else color2 = colors.red;
 
-  // Show dual percentage: total remaining ✦ until compact 💫 max
-  return `⏬ ${color1}${pctRounded}%${colors.reset}✦${color2}${pctUntilCompact}%${colors.reset}💫${maxDisplay}`;
+  // Show dual percentage: total remaining ✦ until compact ⚡️/💫 max
+  const separator = compactOccurred ? "💫" : "⚡️";
+  return `⏬ ${color1}${pctRounded}%${colors.reset}✦${color2}${pctUntilCompact}%${colors.reset}${separator}${maxDisplay}`;
 }
 
 /**
@@ -102,7 +104,8 @@ export function formatStatusLine(
   input: StatusLineInput,
   pct: number | null,
   thresholds: [number, number, number],
-  usedTokens: number
+  usedTokens: number,
+  compactOccurred: boolean
 ): string {
   const model = input?.model?.display_name || input?.model?.id || "model";
   const cwd = input?.workspace?.current_dir || ".";
@@ -125,7 +128,8 @@ export function formatStatusLine(
     input?.model?.id || "",
     input?.model?.display_name || "",
     thresholds,
-    usedTokens
+    usedTokens,
+    compactOccurred
   );
 
   return `📦 ${rootAbbr} › 📁 ${relAbbr} ${gitInfo} 🧠 ${model} ${ctxDisplay}`;

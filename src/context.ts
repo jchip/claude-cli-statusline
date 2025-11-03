@@ -133,8 +133,19 @@ function tryFromTranscriptWithTokens(
   transcriptPath: string | undefined,
   modelId?: string,
   statuslineInput?: any
-): { percentage: number | null; usedTokens: number } {
-  if (!transcriptPath) return { percentage: null, usedTokens: 0 };
+): {
+  percentage: number | null;
+  usedTokens: number;
+  compactOccurred: boolean;
+  saveCache: (statuslineOutput: string) => void;
+} {
+  if (!transcriptPath)
+    return {
+      percentage: null,
+      usedTokens: 0,
+      compactOccurred: false,
+      saveCache: () => {},
+    };
   try {
     const raw = readFileSync(transcriptPath, "utf8");
     const lines = raw.trim().split("\n");
@@ -144,19 +155,41 @@ function tryFromTranscriptWithTokens(
     let startLine = 0;
     let currentUsedTokens = 0;
     let entries: Array<{ line: number; tokens: number }> = [];
+    let compactOccurred = false;
 
     if (cache) {
       // Start from where we left off
       startLine = cache.lastLine;
       currentUsedTokens = cache.lastTokenCount;
       entries = cache.entries || [];
+
+      // Check if a compact occurred (significant drop in tokens) in existing entries
+      if (entries.length >= 2) {
+        for (let i = 1; i < entries.length; i++) {
+          const prev = entries[i - 1].tokens;
+          const curr = entries[i].tokens;
+          if (prev > 0 && curr < prev * 0.7) {
+            compactOccurred = true;
+            break;
+          }
+        }
+      }
     }
 
     // Process only new lines (or all lines if no cache)
     let lastProcessedLine = startLine;
+    let lastCompactMetadata: any = null;
+
     for (let i = startLine; i < lines.length; i++) {
       try {
         const entry = JSON.parse(lines[i]);
+
+        // Check for compact_boundary system message
+        if (entry.type === "system" && entry.subtype === "compact_boundary") {
+          compactOccurred = true;
+          lastCompactMetadata = entry.compactMetadata;
+        }
+
         const usage = entry?.message?.usage;
 
         if (usage) {
@@ -171,11 +204,20 @@ function tryFromTranscriptWithTokens(
             currentUsedTokens = contextUsed;
             lastProcessedLine = i + 1; // +1 because we want to start after this line next time
 
-            // Add entry to history
-            entries.push({
+            // Add entry to history with compact metadata if this is right after a compact
+            const entryData: any = {
               line: i + 1,
               tokens: contextUsed,
-            });
+            };
+
+            if (lastCompactMetadata) {
+              entryData.isCompact = true;
+              entryData.compactTrigger = lastCompactMetadata.trigger;
+              entryData.preCompactTokens = lastCompactMetadata.preTokens;
+              lastCompactMetadata = null; // Clear after using
+            }
+
+            entries.push(entryData);
           }
         }
       } catch {
@@ -183,16 +225,19 @@ function tryFromTranscriptWithTokens(
       }
     }
 
-    // Update cache with the last processed line, token count, entries, and statusline input
-    if (currentUsedTokens > 0) {
-      writeCache(
-        transcriptPath,
-        lastProcessedLine,
-        currentUsedTokens,
-        entries,
-        statuslineInput
-      );
-    }
+    // Create a function to save cache with statusline output later
+    const saveCache = (statuslineOutput: string) => {
+      if (currentUsedTokens > 0) {
+        writeCache(
+          transcriptPath,
+          lastProcessedLine,
+          currentUsedTokens,
+          entries,
+          statuslineInput,
+          statuslineOutput
+        );
+      }
+    };
 
     if (currentUsedTokens > 0) {
       const { tokens: maxTokens } = getModelContextWindow(
@@ -203,12 +248,24 @@ function tryFromTranscriptWithTokens(
       return {
         percentage: clamp((remaining / maxTokens) * 100),
         usedTokens: currentUsedTokens,
+        compactOccurred,
+        saveCache,
       };
     }
 
-    return { percentage: null, usedTokens: 0 };
+    return {
+      percentage: null,
+      usedTokens: 0,
+      compactOccurred: false,
+      saveCache: () => {},
+    };
   } catch {
-    return { percentage: null, usedTokens: 0 };
+    return {
+      percentage: null,
+      usedTokens: 0,
+      compactOccurred: false,
+      saveCache: () => {},
+    };
   }
 }
 
@@ -230,9 +287,16 @@ export function tryFromTranscript(
 export function getContextInfo(
   config: Config,
   input: any
-): { percentage: number | null; usedTokens: number } {
+): {
+  percentage: number | null;
+  usedTokens: number;
+  compactOccurred: boolean;
+  saveCache: (statuslineOutput: string) => void;
+} {
   let pct = null;
   let usedTokens = 0;
+  let compactOccurred = false;
+  let saveCache: (statuslineOutput: string) => void = () => {}; // no-op by default
 
   // Check budget field if it exists
   if (input?.budget) {
@@ -259,9 +323,11 @@ export function getContextInfo(
     );
     pct = result.percentage;
     usedTokens = result.usedTokens;
+    compactOccurred = result.compactOccurred;
+    saveCache = result.saveCache;
   }
 
-  return { percentage: pct, usedTokens };
+  return { percentage: pct, usedTokens, compactOccurred, saveCache };
 }
 
 /**
