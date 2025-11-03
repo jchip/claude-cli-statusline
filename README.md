@@ -2,11 +2,14 @@
 
 A TypeScript statusline for Claude CLI that displays project info, git status, model, and context usage with color-coded indicators.
 
+[![npm version](https://badge.fury.io/js/claude-cli-statusline.svg)](https://badge.fury.io/js/claude-cli-statusline)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Installation
 
 1. Ensure you have [Bun](https://bun.sh) installed
 
-### `bunx` and npm package
+### `bunx` (Recommended)
 
 2. Add to your Claude config (`~/.claude/settings.json` or your project's `.claude/settings.json`):
 
@@ -17,6 +20,14 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
     "command": "bunx claude-cli-statusline"
   }
 }
+```
+
+### Global Installation (Optional)
+
+You can optionally install it globally with Bun to avoid `bunx` downloading it:
+
+```bash
+bun add -g claude-cli-statusline
 ```
 
 ### Manually Clone/Copy
@@ -51,6 +62,8 @@ Or with a custom config file:
 ```
 📦 ~/path/to/root › 📁 relative/dir 🐙 📦 ⎇ branch 🧠 Model ⏬ 89%✦67%💫200K
 ```
+
+**Test Coverage:** 95.28% lines, 92.42% functions
 
 **Icons:**
 
@@ -350,6 +363,35 @@ The script calculates context usage by:
 - Claude Opus 4 (200k context)
 - Claude 3.5 Sonnet (200k context)
 - Claude 3 Opus/Sonnet/Haiku (200k context)
+
+## Development
+
+### Testing
+
+Run the test suite:
+
+```bash
+bun test
+```
+
+Run with coverage:
+
+```bash
+bun coverage
+```
+
+### Building
+
+The project uses Bun as the runtime and doesn't require compilation. All TypeScript files are executed directly.
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
 
 ## Debugging
 
