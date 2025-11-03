@@ -64,6 +64,13 @@ export function loadConfig(
       "claude-3-sonnet-20240229": 200000,
       "claude-3-haiku-20240307": 200000,
     },
+    "display-name-model-context-windows": {
+      "Sonnet 4.5": 200000,
+      "Sonnet 4": 200000,
+      "Opus 4": 200000,
+      "Haiku 4": 200000,
+    },
+    "default-context-window": 200000,
     "compact-buffer": 45000,
     "save-sample": {
       enable: false,
@@ -83,6 +90,12 @@ export function loadConfig(
         "model-context-windows":
           configData["model-context-windows"] ||
           defaultConfig["model-context-windows"],
+        "display-name-model-context-windows":
+          configData["display-name-model-context-windows"] ||
+          defaultConfig["display-name-model-context-windows"],
+        "default-context-window":
+          configData["default-context-window"] ??
+          defaultConfig["default-context-window"],
         "compact-buffer":
           configData["compact-buffer"] ?? defaultConfig["compact-buffer"],
         "save-sample": {
@@ -101,6 +114,30 @@ export function loadConfig(
   return defaultConfig;
 }
 
-export function getModelContextWindow(config: Config, modelId: string): number {
-  return config["model-context-windows"][modelId] || 200000; // default to 200k
+export function getModelContextWindow(
+  config: Config,
+  modelId: string,
+  displayName?: string
+): { tokens: number; source: "id" | "display-name" | "default" } {
+  // Try model ID first
+  if (config["model-context-windows"][modelId]) {
+    return {
+      tokens: config["model-context-windows"][modelId],
+      source: "id",
+    };
+  }
+
+  // Try display name as fallback
+  if (
+    displayName &&
+    config["display-name-model-context-windows"][displayName]
+  ) {
+    return {
+      tokens: config["display-name-model-context-windows"][displayName],
+      source: "display-name",
+    };
+  }
+
+  // Use configured default
+  return { tokens: config["default-context-window"], source: "default" };
 }

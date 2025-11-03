@@ -194,8 +194,11 @@ function tryFromTranscriptWithTokens(
       );
     }
 
-    if (currentUsedTokens > 0 && modelId) {
-      const maxTokens = getModelContextWindow(config, modelId);
+    if (currentUsedTokens > 0) {
+      const { tokens: maxTokens } = getModelContextWindow(
+        config,
+        modelId || ""
+      );
       const remaining = maxTokens - currentUsedTokens;
       return {
         percentage: clamp((remaining / maxTokens) * 100),

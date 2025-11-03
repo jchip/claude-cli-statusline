@@ -5,6 +5,8 @@
 export interface Config {
   "context-color-levels": [number, number, number];
   "model-context-windows": Record<string, number>;
+  "display-name-model-context-windows": Record<string, number>;
+  "default-context-window": number;
   "compact-buffer": number;
   "save-sample": {
     enable: boolean;

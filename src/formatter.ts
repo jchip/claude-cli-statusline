@@ -23,11 +23,12 @@ export function formatContextDisplay(
   config: Config,
   pct: number | null,
   modelId: string,
+  displayName: string,
   thresholds: [number, number, number],
   usedTokens: number
 ): string {
   if (pct === null || !isFinite(pct)) {
-    return "⏬ 💤";
+    return "💤";
   }
 
   const pctRounded = Math.round(pct);
@@ -40,8 +41,14 @@ export function formatContextDisplay(
   else if (pctRounded >= orangeThreshold) color = colors.orange;
   else color = colors.red;
 
-  const maxTokens = getModelContextWindow(config, modelId);
-  const maxDisplay = formatTokenCount(maxTokens);
+  const { tokens: maxTokens, source } = getModelContextWindow(
+    config,
+    modelId,
+    displayName
+  );
+  const indicator =
+    source === "default" ? "⚙️" : source === "display-name" ? "🏷️" : "";
+  const maxDisplay = formatTokenCount(maxTokens) + indicator;
 
   // Calculate percentage until compact (remaining before hitting compact buffer)
   const compactBuffer = config["compact-buffer"];
@@ -109,6 +116,7 @@ export function formatStatusLine(
     config,
     pct,
     input?.model?.id || "",
+    input?.model?.display_name || "",
     thresholds,
     usedTokens
   );

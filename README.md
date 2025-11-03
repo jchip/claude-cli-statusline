@@ -204,6 +204,32 @@ Add entries here if you need to support additional models or if Claude releases 
 
 **Default:** 200,000 tokens for unknown models
 
+### `display-name-model-context-windows`
+
+A mapping of model display names to their context window sizes. Used as a fallback when model ID is not found.
+
+**Example:**
+
+```json
+{
+  "display-name-model-context-windows": {
+    "Sonnet 4.5": 200000,
+    "Opus 4": 200000,
+    "Haiku 4": 200000
+  }
+}
+```
+
+When a context window is found via display name, it shows with a 🏷️ indicator: `⏬ 60%✦15%💫200K🏷️`
+
+### `default-context-window`
+
+The default context window size to use when neither model ID nor display name is found in the config.
+
+**Default:** `200000` tokens
+
+When using the default, it shows with a ⚙️ indicator: `⏬ 60%✦15%💫200K⚙️`
+
 ## Performance Optimizations
 
 ### Transcript Caching
