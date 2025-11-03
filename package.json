@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "bun index.ts",
-    "debug": "bun debug.ts",
-    "analyze": "bun analyze-transcript.ts"
+    "debug": "bun tools/debug.ts",
+    "analyze": "bun tools/analyze-transcript.ts"
   },
   "keywords": [
     "claude",
