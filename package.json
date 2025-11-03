@@ -1,23 +1,37 @@
 {
   "name": "claude-cli-statusline",
   "version": "1.0.0",
-  "description": "A TypeScript statusline for Claude CLI with color-coded context usage indicators",
+  "description": "A bun TypeScript statusline for Claude CLI with color-coded context usage indicators",
   "main": "index.ts",
   "type": "module",
   "scripts": {
     "start": "bun index.ts",
     "debug": "bun tools/debug.ts",
-    "analyze": "bun tools/analyze-transcript.ts"
+    "analyze": "bun tools/analyze-transcript.ts",
+    "test": "bun test",
+    "coverage": "bun test --coverage"
   },
+  "bin": "index.ts",
   "keywords": [
     "claude",
     "cli",
     "statusline",
     "terminal"
   ],
-  "author": "",
+  "files": [
+    "src",
+    "statusline-config.json"
+  ],
+  "author": "Joel Chen <joel123@gmail.com>",
+  "contributors": [
+    "Claude <noreply@anthropic.com>",
+    "xAI Grok Code Fast 1"
+  ],
   "license": "MIT",
   "engines": {
     "bun": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.1"
   }
 }
