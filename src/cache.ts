@@ -22,6 +22,7 @@ interface CacheData {
   lastTokenCount: number;
   lastModified: number;
   entries: LineEntry[];
+  "statusline-input"?: any;
 }
 
 /**
@@ -72,7 +73,8 @@ export function writeCache(
   transcriptPath: string,
   lastLine: number,
   lastTokenCount: number,
-  entries: LineEntry[]
+  entries: LineEntry[],
+  statuslineInput?: any
 ): void {
   try {
     const cacheDir = getCacheDir(transcriptPath);
@@ -90,6 +92,7 @@ export function writeCache(
       lastTokenCount,
       lastModified: transcriptStat.mtimeMs,
       entries,
+      "statusline-input": statuslineInput,
     };
 
     writeFileSync(cachePath, JSON.stringify(cache, null, 2));

@@ -131,7 +131,8 @@ export function findPercentRecursive(o: any, depth = 0): number | null {
 function tryFromTranscriptWithTokens(
   config: Config,
   transcriptPath: string | undefined,
-  modelId?: string
+  modelId?: string,
+  statuslineInput?: any
 ): { percentage: number | null; usedTokens: number } {
   if (!transcriptPath) return { percentage: null, usedTokens: 0 };
   try {
@@ -182,9 +183,15 @@ function tryFromTranscriptWithTokens(
       }
     }
 
-    // Update cache with the last processed line, token count, and entries
+    // Update cache with the last processed line, token count, entries, and statusline input
     if (currentUsedTokens > 0) {
-      writeCache(transcriptPath, lastProcessedLine, currentUsedTokens, entries);
+      writeCache(
+        transcriptPath,
+        lastProcessedLine,
+        currentUsedTokens,
+        entries,
+        statuslineInput
+      );
     }
 
     if (currentUsedTokens > 0 && modelId) {
@@ -244,7 +251,8 @@ export function getContextInfo(
     const result = tryFromTranscriptWithTokens(
       config,
       input?.transcript_path,
-      input?.model?.id
+      input?.model?.id,
+      input
     );
     pct = result.percentage;
     usedTokens = result.usedTokens;

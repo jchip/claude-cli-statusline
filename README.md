@@ -22,7 +22,7 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 ## What it shows
 
 ```
-📦 ~/path/to/root › 📁 relative/dir 🐙 📦 ⎇ branch 🧠 Model 60%✦15%💫200K
+📦 ~/path/to/root › 📁 relative/dir 🐙 📦 ⎇ branch 🧠 Model ⏬ 89%✦67%💫200K
 ```
 
 **Icons:**
@@ -34,12 +34,12 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 - ⎇ Git branch (🟢 green if in repo, 🟡 yellow if no repo)
 - ∅ No git repository
 - 🧠 Model name
-- Context display: `60%✦15%💫200K`
-  - First percentage (60%): Total remaining context
+- ⏬ Context display: `89%✦67%💫200K`
+  - First percentage (89%): Total remaining context
   - ✦ separator
-  - Second percentage (15%): Remaining before auto-compact
+  - Second percentage (67%): Remaining before auto-compact
   - 💫 separator
-  - Max context window (200K)
+  - Max context window (200K) - configurable in config file
 
 **Context Colors:**
 
@@ -141,10 +141,10 @@ The number of tokens to reserve as a buffer before auto-compact. Claude CLI auto
 
 **Default:** `45000` tokens
 
-This setting affects the second percentage in the display (e.g., `60%|15%`):
+This setting affects the second percentage in the display (e.g., `89%|67%`):
 
-- First percentage: Total remaining context (60% = 120K tokens remaining)
-- Second percentage: Remaining before auto-compact (15% = 30K tokens until compact at 45K buffer)
+- First percentage: Total remaining context (89% = 120K tokens remaining)
+- Second percentage: Remaining before auto-compact (67% = 30K tokens until compact at 45K buffer)
 
 When the second percentage reaches 0%, Claude CLI will auto-compact the conversation, which resets the context and may cause the percentages to jump back up.
 
@@ -174,8 +174,9 @@ Add entries here if you need to support additional models or if Claude releases 
 The statusline automatically caches transcript analysis results in a `.statusline` directory next to the transcript file. This provides:
 
 - **Incremental updates**: Only new lines are analyzed on each run
-- **Fast startup**: Cached results are reused when the transcript hasn't changed
-- **Automatic invalidation**: Cache is cleared when the transcript file is modified
+- **Fast startup**: Cached results are reused and extended as the session continues
+- **Session persistence**: Cache persists across auto-compacts (same session, same cache)
+- **Automatic reset**: New session (via `/reset`) creates a new transcript and cache file
 
 The cache stores:
 
@@ -183,14 +184,18 @@ The cache stores:
 - Last token count
 - Transcript modification time
 - Complete history of all analyzed entries (line number + token count)
+- **Statusline input data** (the complete JSON input from Claude CLI)
 
-This history allows for:
+This comprehensive cache allows for:
 
-- Detecting auto-compact events (sudden drops in token count)
-- Analyzing token usage patterns over time
-- Debugging context issues
+- **Detecting auto-compact events** (sudden drops in token count)
+- **Analyzing token usage patterns** over time
+- **Debugging context issues** with full input data
+- **Eliminating need for separate sample files** - the cache includes everything
 
-This makes the statusline extremely fast even with large transcript files (1MB+).
+Cache location: `~/.claude/projects/<project>/.statusline/<session-id>.jsonl.cache.json`
+
+This makes the statusline extremely fast even with large transcript files (1MB+), while providing complete debugging information.
 
 ### Config File Hierarchy
 
