@@ -258,6 +258,123 @@ describe("context", () => {
       // Cleanup
       unlinkSync(transcriptPath);
     });
+
+    it("should handle transcript with zero token entries", () => {
+      const tempDir = tmpdir();
+      const transcriptPath = join(tempDir, "test-zero-tokens.jsonl");
+
+      const transcriptData = [
+        JSON.stringify({
+          type: "tool_use",
+          message: {
+            usage: {
+              input_tokens: 0,
+              cache_creation_input_tokens: 0,
+              cache_read_input_tokens: 0,
+            },
+          },
+        }),
+        JSON.stringify({
+          type: "assistant",
+          message: {
+            usage: {
+              input_tokens: 50,
+              cache_creation_input_tokens: 25,
+              cache_read_input_tokens: 10,
+            },
+          },
+        }),
+      ].join("\n");
+
+      writeFileSync(transcriptPath, transcriptData);
+
+      const input = { transcript_path: transcriptPath };
+      const result = getContextInfo(mockConfig, input);
+
+      expect(result.percentage).toBeCloseTo(99.9575, 2);
+      expect(result.usedTokens).toBe(85);
+
+      // Cleanup
+      unlinkSync(transcriptPath);
+    });
+
+    it("should handle transcript with only zero token entries", () => {
+      const tempDir = tmpdir();
+      const transcriptPath = join(tempDir, "test-only-zero.jsonl");
+
+      const transcriptData = [
+        JSON.stringify({
+          type: "tool_use",
+          message: {
+            usage: {
+              input_tokens: 0,
+              cache_creation_input_tokens: 0,
+              cache_read_input_tokens: 0,
+            },
+          },
+        }),
+      ].join("\n");
+
+      writeFileSync(transcriptPath, transcriptData);
+
+      const input = { transcript_path: transcriptPath };
+      const result = getContextInfo(mockConfig, input);
+
+      expect(result.percentage).toBe(null);
+      expect(result.usedTokens).toBe(0);
+
+      // Cleanup
+      unlinkSync(transcriptPath);
+    });
+
+    it("should handle transcript with cache entries having compact detection", () => {
+      const tempDir = tmpdir();
+      const transcriptPath = join(tempDir, "test-cache-compact.jsonl");
+
+      // Create transcript
+      const transcriptData = [
+        JSON.stringify({
+          type: "assistant",
+          message: {
+            usage: {
+              input_tokens: 100000, // High token count
+            },
+          },
+        }),
+        JSON.stringify({
+          type: "assistant",
+          message: {
+            usage: {
+              input_tokens: 10000, // Much lower (70% drop)
+            },
+          },
+        }),
+      ].join("\n");
+
+      writeFileSync(transcriptPath, transcriptData);
+
+      // Create cache with the high token count first
+      const cacheDir = join(tempDir, ".statusline");
+      mkdirSync(cacheDir, { recursive: true });
+      const cachePath = join(cacheDir, "test-cache-compact.jsonl.cache.json");
+      const cacheData = {
+        lastLine: 1,
+        lastTokenCount: 100000,
+        lastModified: Date.now(),
+        entries: [{ line: 1, tokens: 100000 }],
+      };
+      writeFileSync(cachePath, JSON.stringify(cacheData));
+
+      const input = { transcript_path: transcriptPath };
+      const result = getContextInfo(mockConfig, input);
+
+      expect(result.compactOccurred).toBe(false);
+      expect(result.usedTokens).toBe(10000);
+
+      // Cleanup
+      unlinkSync(transcriptPath);
+      rmdirSync(cacheDir, { recursive: true });
+    });
   });
 
   describe("tryFromTranscript", () => {
