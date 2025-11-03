@@ -7,40 +7,51 @@ import { join } from "path";
 import type { Config } from "./types";
 
 /**
- * Find config file in order of precedence:
- * 1. .claude/statusline-config.json in workspace project directory
- * 2. ~/.claude/statusline-config.json
- * 3. config.json in script directory
+ * Find config file by searching in standard locations
+ * If configFile is absolute, use it directly
+ * If configFile is relative, search in: project .claude/ → user ~/.claude/ → script dir
  */
-function findConfigPath(projectDir?: string): string | null {
+function findConfigPath(
+  configFile: string,
+  projectDir?: string
+): string | null {
+  // Absolute path - use directly
+  if (configFile.startsWith("/")) {
+    return existsSync(configFile) ? configFile : null;
+  }
+
   const home = process.env.HOME || "";
 
-  // 1. Check project .claude directory (from workspace.project_dir)
+  // Relative path - search in order
+  // 1. Project .claude directory
   if (projectDir) {
-    const projectConfig = join(projectDir, ".claude", "statusline-config.json");
-    if (existsSync(projectConfig)) {
-      return projectConfig;
+    const projectPath = join(projectDir, ".claude", configFile);
+    if (existsSync(projectPath)) {
+      return projectPath;
     }
   }
 
-  // 2. Check home .claude directory
+  // 2. User home .claude directory
   if (home) {
-    const homeConfig = join(home, ".claude", "statusline-config.json");
-    if (existsSync(homeConfig)) {
-      return homeConfig;
+    const homePath = join(home, ".claude", configFile);
+    if (existsSync(homePath)) {
+      return homePath;
     }
   }
 
-  // 3. Check script directory
-  const scriptConfig = join(import.meta.dir, "..", "config.json");
-  if (existsSync(scriptConfig)) {
-    return scriptConfig;
+  // 3. Script directory
+  const scriptPath = join(import.meta.dir, "..", configFile);
+  if (existsSync(scriptPath)) {
+    return scriptPath;
   }
 
   return null;
 }
 
-export function loadConfig(projectDir?: string): Config {
+export function loadConfig(
+  projectDir?: string,
+  configFile: string = "statusline-config.json"
+): Config {
   const defaultConfig: Config = {
     "context-color-levels": [65, 45, 20],
     "model-context-windows": {
@@ -60,7 +71,7 @@ export function loadConfig(projectDir?: string): Config {
     },
   };
 
-  const configPath = findConfigPath(projectDir);
+  const configPath = findConfigPath(configFile, projectDir);
 
   if (configPath) {
     try {

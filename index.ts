@@ -15,10 +15,15 @@ async function main() {
     .json()
     .catch(() => ({} as any));
 
+  // Parse --config CLI flag (if specified, use it; otherwise use default)
+  const configArg = process.argv.find((arg) => arg.startsWith("--config="));
+  const configFile = configArg
+    ? configArg.split("=")[1]
+    : "statusline-config.json";
+
   // Load config fresh on each run (allows dynamic changes)
-  // Pass project_dir so config can be loaded from workspace .claude directory
   const projectDir = input?.workspace?.project_dir;
-  const config = loadConfig(projectDir);
+  const config = loadConfig(projectDir, configFile);
 
   // Save sample input for debugging if enabled in config or via CLI flag
   const saveSampleArg = process.argv.find((arg) =>

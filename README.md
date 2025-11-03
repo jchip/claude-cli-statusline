@@ -17,6 +17,17 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 }
 ```
 
+Or with a custom config file:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bun ~/claude-cli-statusline/index.ts --config=my-config.json"
+  }
+}
+```
+
 **Note:** Adjust the path if you installed it elsewhere.
 
 ## What it shows
@@ -48,9 +59,29 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 - 🟠 Orange: 20-45% remaining
 - 🔴 Red: <20% remaining
 
-## Options
+## CLI Options
 
 You can pass options to customize the statusline behavior:
+
+### `--config=<filename>`
+
+Specify a custom config file. If the path is relative, it searches in order:
+
+1. Project `.claude/` directory
+2. User `~/.claude/` directory
+3. Script directory
+
+**Default:** `statusline-config.json`
+
+**Examples:**
+
+```bash
+# Use absolute path
+bun ~/claude-cli-statusline/index.ts --config=/path/to/my-config.json
+
+# Use relative path (searches in .claude dirs)
+bun ~/claude-cli-statusline/index.ts --config=my-config.json
+```
 
 ### `--context-levels=green,yellow,orange`
 
@@ -106,13 +137,11 @@ Or with custom filename:
 
 ## Config
 
-Configuration files are loaded in order of precedence:
+**The config is reloaded on every statusline update**, so you can modify it while Claude CLI is running.
 
-1. **Project config**: `.claude/statusline-config.json` in your workspace project directory (from `workspace.project_dir`)
-2. **User config**: `~/.claude/statusline-config.json` in your home directory
-3. **Script config**: `config.json` in the statusline script directory
+### Default Config File
 
-**The config is reloaded on every statusline update**, so you can modify it while Claude CLI is running:
+Create `statusline-config.json` in the script directory with:
 
 ```json
 {
@@ -134,6 +163,14 @@ Configuration files are loaded in order of precedence:
   }
 }
 ```
+
+### Config File Search Order
+
+When using relative paths (default or via `--config`), files are searched in:
+
+1. **Project**: `.claude/<filename>` in workspace project directory
+2. **User**: `~/.claude/<filename>` in home directory
+3. **Script**: `<filename>` in statusline script directory
 
 ### `compact-buffer`
 

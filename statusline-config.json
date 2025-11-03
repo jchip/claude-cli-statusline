@@ -13,6 +13,6 @@
   "compact-buffer": 45000,
   "save-sample": {
     "enable": false,
-    "filename": "sample-input.json"
+    "filename": ".temp/sample-input.json"
   }
 }
