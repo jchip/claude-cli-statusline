@@ -2,8 +2,10 @@
   "context-color-levels": [65, 45, 20],
   "model-context-windows": {
     "claude-sonnet-4-5-20250929": 200000,
+    "claude-sonnet-4-5-20250929[1m]": 1000000,
     "claude-sonnet-4-20250514": 200000,
     "claude-opus-4-20250514": 200000,
+    "claude-opus-4-1-20250805": 200000,
     "claude-3-5-sonnet-20241022": 200000,
     "claude-3-5-sonnet-20240620": 200000,
     "claude-3-opus-20240229": 200000,
@@ -12,8 +14,10 @@
   },
   "display-name-model-context-windows": {
     "Sonnet 4.5": 200000,
+    "Sonnet 4.5 (1M context)": 1000000,
     "Sonnet 4": 200000,
     "Opus 4": 200000,
+    "Opus 4.1": 200000,
     "Haiku 4": 200000
   },
   "default-context-window": 200000,

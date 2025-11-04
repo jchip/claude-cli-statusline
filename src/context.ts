@@ -132,6 +132,7 @@ function tryFromTranscriptWithTokens(
   config: Config,
   transcriptPath: string | undefined,
   modelId?: string,
+  displayName?: string,
   statuslineInput?: any
 ): {
   percentage: number | null;
@@ -242,7 +243,8 @@ function tryFromTranscriptWithTokens(
     if (currentUsedTokens > 0) {
       const { tokens: maxTokens } = getModelContextWindow(
         config,
-        modelId || ""
+        modelId || "",
+        displayName
       );
       const remaining = maxTokens - currentUsedTokens;
       return {
@@ -275,9 +277,10 @@ function tryFromTranscriptWithTokens(
 export function tryFromTranscript(
   config: Config,
   transcriptPath: string | undefined,
-  modelId?: string
+  modelId?: string,
+  displayName?: string
 ): number | null {
-  return tryFromTranscriptWithTokens(config, transcriptPath, modelId)
+  return tryFromTranscriptWithTokens(config, transcriptPath, modelId, displayName)
     .percentage;
 }
 
@@ -319,6 +322,7 @@ export function getContextInfo(
       config,
       input?.transcript_path,
       input?.model?.id,
+      input?.model?.display_name,
       input
     );
     pct = result.percentage;
