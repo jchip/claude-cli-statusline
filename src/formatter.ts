@@ -107,7 +107,9 @@ export function formatStatusLine(
   usedTokens: number,
   compactOccurred: boolean
 ): string {
-  const model = input?.model?.display_name || input?.model?.id || "model";
+  const rawDisplayName = input?.model?.display_name || input?.model?.id || "model";
+  // Map display name for rendering (e.g., "Sonnet 4.5 (1M context)" -> "Sonnet 4.5")
+  const model = config["model-display-name-map"][rawDisplayName] || rawDisplayName;
   const cwd = input?.workspace?.current_dir || ".";
   const root = input?.workspace?.project_dir || cwd;
   const transcriptPath = input?.transcript_path;

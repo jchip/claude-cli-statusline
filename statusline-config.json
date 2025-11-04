@@ -21,6 +21,9 @@
     "Haiku 4": 200000
   },
   "default-context-window": 200000,
+  "model-display-name-map": {
+    "Sonnet 4.5 (1M context)": "Sonnet 4.5"
+  },
   "compact-buffer": 45000,
   "save-sample": {
     "enable": false,

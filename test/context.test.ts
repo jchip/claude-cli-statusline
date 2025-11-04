@@ -17,6 +17,7 @@ const mockConfig: Config = {
     "claude-3-5-sonnet-20241022": 200000,
   },
   "display-name-model-context-windows": {},
+  "model-display-name-map": {},
   "default-context-window": 200000,
   "compact-buffer": 45000,
   "save-sample": {

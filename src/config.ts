@@ -70,6 +70,7 @@ export function loadConfig(
       "Opus 4": 200000,
       "Haiku 4": 200000,
     },
+    "model-display-name-map": {},
     "default-context-window": 200000,
     "compact-buffer": 45000,
     "save-sample": {
@@ -93,6 +94,9 @@ export function loadConfig(
         "display-name-model-context-windows":
           configData["display-name-model-context-windows"] ||
           defaultConfig["display-name-model-context-windows"],
+        "model-display-name-map":
+          configData["model-display-name-map"] ||
+          defaultConfig["model-display-name-map"],
         "default-context-window":
           configData["default-context-window"] ??
           defaultConfig["default-context-window"],

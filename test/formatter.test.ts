@@ -13,6 +13,7 @@ const mockConfig: Config = {
     "claude-3-5-sonnet-20241022": 200000,
   },
   "display-name-model-context-windows": {},
+  "model-display-name-map": {},
   "default-context-window": 200000,
   "compact-buffer": 45000,
   "save-sample": {
@@ -225,6 +226,51 @@ describe("formatter", () => {
         false
       );
       expect(result).toContain("model");
+    });
+
+    it("should map display name using model-display-name-map", () => {
+      const configWithMap: Config = {
+        ...mockConfig,
+        "model-display-name-map": {
+          "Sonnet 4.5 (1M context)": "Sonnet 4.5",
+        },
+      };
+      const inputWithLongName = {
+        ...mockInput,
+        model: {
+          id: "claude-sonnet-4-5-20250929",
+          display_name: "Sonnet 4.5 (1M context)",
+        },
+      };
+      const result = formatStatusLine(
+        configWithMap,
+        inputWithLongName,
+        75,
+        [65, 45, 20],
+        25000,
+        false
+      );
+      expect(result).toContain("Sonnet 4.5");
+      expect(result).not.toContain("(1M context)");
+    });
+
+    it("should use original display name when no mapping exists", () => {
+      const inputWithUnmappedName = {
+        ...mockInput,
+        model: {
+          id: "claude-sonnet-4-5-20250929",
+          display_name: "Custom Model Name",
+        },
+      };
+      const result = formatStatusLine(
+        mockConfig,
+        inputWithUnmappedName,
+        75,
+        [65, 45, 20],
+        25000,
+        false
+      );
+      expect(result).toContain("Custom Model Name");
     });
   });
 });
