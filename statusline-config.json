@@ -28,5 +28,10 @@
   "save-sample": {
     "enable": false,
     "filename": ".temp/sample-input.json"
-  }
+  },
+  "animations": {
+    "enabled": true
+  },
+  "show-git-repo-name": false,
+  "show-project-full-dir": false
 }

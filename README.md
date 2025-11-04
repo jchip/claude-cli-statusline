@@ -11,7 +11,7 @@ A TypeScript statusline for Claude CLI that displays project info, git status, m
 
 ### `bunx` (Recommended)
 
-2. Add to your Claude config (`~/.claude/settings.json` or your project's `.claude/settings.json`):
+2. Add to your Claude config (`~/.claude/settings.json` or your project's `.claude/settings.local.json`):
 
 ```json
 {
@@ -33,7 +33,7 @@ bun add -g claude-cli-statusline
 ### Manually Clone/Copy
 
 2. Clone or copy this repo to your home directory (e.g., `~/claude-cli-statusline`)
-3. Add to your Claude config (`~/.claude/settings.json` or your project's `.claude/settings.json`):
+3. Add to your Claude config (`~/.claude/settings.json` or your project's `.claude/settings.local.json`):
 
 ```json
 {
@@ -60,26 +60,28 @@ Or with a custom config file:
 ## What it shows
 
 ```
-📦 ~/path/to/root › 📁 relative/dir 🐙 📦 ⎇ branch 🧠 Model ⏬ 89%✦67%💫200K
+📦 project-name 📁 relative/dir 🐙 ⎇branch 🧠 Model ⏬ 89%✦67%⚡️200K
 ```
-
-**Test Coverage:** 95.28% lines, 92.42% functions
 
 **Icons:**
 
-- 📦 Project root directory
+- 📦 Project root directory (basename only by default)
+  - With `show-project-full-dir: true` in config: shows full path like `~/path/to/project`
 - 📁 Current relative directory
-- 🐙 📦 Git repo (octopus + box when repo name matches root directory)
-- 🐙 repo-name Git repo (octopus + name when repo name differs from root)
+- 🐙 Git repo (octopus icon only by default)
+  - With `show-git-repo-name: true` in config:
+    - `🐙 📦` when repo name matches directory name
+    - `🐙 repo-name` when repo name differs from directory name
+  - Git repo name is extracted from remote URL (e.g., `git@github.com:user/my-repo.git` → `my-repo`)
 - ⎇ Git branch (🟢 green if in repo, 🟡 yellow if no repo)
   - ∅ No git repository
 - 🧠 Model name
 - ⏬ Context display: `89%✦67%⚡️200K`
   - First percentage (89%): Total remaining context
   - ✦ separator
-  - Second percentage (67%): Remaining before auto-compact
-  - ⚡️ separator or 💫 if context was compacted (auto or manual)
-  - Max context window (200K) - configurable in config file
+  - Second percentage (67%): Remaining before auto-compact (calculated as percentage of usable space after buffer)
+  - ⚡️ Not compacted or 💫 if context was compacted (auto or manual)
+  - Max context window (200K, 1M, etc.) with cyan-colored K/M suffix
 
 **Context Colors:**
 
@@ -87,6 +89,25 @@ Or with a custom config file:
 - 🟡 Yellow: 45-65% remaining
 - 🟠 Orange: 20-45% remaining
 - 🔴 Red: <20% remaining
+
+## Animation Features (Optional)
+
+The statusline supports optional animations to make it feel more alive:
+
+- **Spinner:** Animated braille spinner (⠸ ⠙ ⠹...) instead of static ⏬
+- **Trend arrow:** Shows direction of change (↗ ↘ →)
+- **Sparkline:** Mini bar chart of recent usage (▂▄▅▆█)
+
+**Example with animations:**
+```
+⠸ 75%✦52%⚡️200K⠧ ↗▂▄▅▆█
+```
+
+Note: When animations are enabled, the spinner appears after the max context window.
+
+See [docs/ANIMATIONS.md](docs/ANIMATIONS.md) for details and configuration.
+
+**Note:** Animations are **disabled by default** to maintain a clean, static statusline.
 
 ## CLI Options
 
@@ -170,28 +191,7 @@ Or with custom filename:
 
 ### Default Config File
 
-Create `statusline-config.json` in the script directory with:
-
-```json
-{
-  "context-color-levels": [65, 45, 20],
-  "model-context-windows": {
-    "claude-sonnet-4-5-20250929": 200000,
-    "claude-sonnet-4-20250514": 200000,
-    "claude-opus-4-20250514": 200000,
-    "claude-3-5-sonnet-20241022": 200000,
-    "claude-3-5-sonnet-20240620": 200000,
-    "claude-3-opus-20240229": 200000,
-    "claude-3-sonnet-20240229": 200000,
-    "claude-3-haiku-20240307": 200000
-  },
-  "compact-buffer": 45000,
-  "save-sample": {
-    "enable": false,
-    "filename": "sample-input.json"
-  }
-}
-```
+See [statusline-config.json](statusline-config.json) for the default configuration file with all available options and their default values.
 
 ### Config File Search Order
 
@@ -207,10 +207,13 @@ The number of tokens to reserve as a buffer before auto-compact. Claude CLI auto
 
 **Default:** `45000` tokens
 
-This setting affects the second percentage in the display (e.g., `89%|67%`):
+This setting affects the second percentage in the display (e.g., `89%✦67%`):
 
-- First percentage: Total remaining context (89% = 120K tokens remaining)
-- Second percentage: Remaining before auto-compact (67% = 30K tokens until compact at 45K buffer)
+- First percentage: Total remaining context (89% = 178K tokens remaining out of 200K)
+- Second percentage: Remaining before auto-compact (67% = percentage of usable space remaining)
+  - Calculation: `(usableSpace - used) / usableSpace * 100`
+  - Where `usableSpace = maxTokens - compactBuffer`
+  - This matches Claude CLI's buffer calculation method
 
 When the second percentage reaches 0%, Claude CLI will auto-compact the conversation, which resets the context and may cause the percentages to jump back up.
 
@@ -260,36 +263,6 @@ The default context window size to use when neither model ID nor display name is
 When using the default, it shows with a ⚙️ indicator: `⏬ 60%✦15%💫200K⚙️`
 
 ## Performance Optimizations
-
-### Transcript Caching
-
-The statusline automatically caches transcript analysis results in a `.statusline` directory next to the transcript file. This provides:
-
-- **Incremental updates**: Only new lines are analyzed on each run
-- **Fast startup**: Cached results are reused and extended as the session continues
-- **Session persistence**: Cache persists across auto-compacts (same session, same cache)
-- **Automatic reset**: New session (via `/reset`) creates a new transcript and cache file
-
-The cache stores:
-
-- Last analyzed line number
-- Last token count
-- Transcript modification time
-- Complete history of all analyzed entries (line number + token count)
-- **Statusline input data** (the complete JSON input from Claude CLI)
-- **Statusline output string** (the formatted statusline that was displayed)
-
-This comprehensive cache allows for:
-
-- **Detecting auto-compact events** (sudden drops in token count)
-- **Analyzing token usage patterns** over time
-- **Debugging context issues** with full input data
-- **Debugging display issues** with the actual output string
-- **Eliminating need for separate sample files** - the cache includes everything
-
-Cache location: `~/.claude/projects/<project>/.statusline/<session-id>.jsonl.cache.json`
-
-This makes the statusline extremely fast even with large transcript files (1MB+), while providing complete debugging information including the exact output that was displayed.
 
 ### Config File Hierarchy
 
@@ -347,22 +320,55 @@ An object to control saving the input JSON on every statusline update. Useful fo
 
 **Note:** You can change `enable` to `true` while Claude CLI is running, and the next statusline update will start saving samples. The CLI flag `--save-sample[=filename]` overrides these config values.
 
-## How it works
+### `show-git-repo-name`
 
-The script calculates context usage by:
+Controls whether to show the git repository name in the statusline.
 
-1. Reading the transcript file (JSONL format) from the path provided by Claude CLI
-2. Parsing each line to find `message.usage` objects containing token counts
-3. Summing up: `input_tokens + cache_creation_input_tokens + cache_read_input_tokens`
-4. Comparing against the model's context window (200k tokens for current models)
-5. Displaying the remaining percentage with color-coded visual indicators
+**Default:** `false` (disabled)
 
-**Supported Models:**
+When `false` (default):
+- Shows only: `🐙 ⎇ branch` (octopus icon + branch)
 
-- Claude Sonnet 4.5 (200k context)
-- Claude Opus 4 (200k context)
-- Claude 3.5 Sonnet (200k context)
-- Claude 3 Opus/Sonnet/Haiku (200k context)
+When `true`:
+- Shows `🐙 📦 ⎇ branch` if repo name matches directory name
+- Shows `🐙 repo-name ⎇ branch` if repo name differs from directory name
+
+**Git repo name detection:**
+- First tries to extract from remote URL: `git remote get-url origin`
+- For example: `git@github.com:user/my-repo.git` → `my-repo`
+- Falls back to directory basename if no remote is configured
+
+**Example:**
+
+```json
+{
+  "show-git-repo-name": true
+}
+```
+
+**Why disabled by default:** This keeps the statusline shorter and cleaner, as the repository name is often redundant with the project directory name. Enable it if you work in directories where the folder name differs from the actual git repository name (e.g., cloned with a different name, renamed directory, or forked repos).
+
+### `show-project-full-dir`
+
+Controls whether to show the full project directory path or just the basename.
+
+**Default:** `false` (disabled - shows basename only)
+
+When `false` (default):
+- Shows only basename: `📦 project-name`
+
+When `true`:
+- Shows full path with home shortening: `📦 ~/path/to/project-name`
+
+**Example:**
+
+```json
+{
+  "show-project-full-dir": true
+}
+```
+
+**Why disabled by default:** The basename is usually sufficient and keeps the statusline more concise. Enable it if you need to distinguish between multiple projects with the same name in different locations.
 
 ## Development
 
@@ -405,7 +411,7 @@ Edit your Claude config to use the debug script:
 {
   "statusLine": {
     "type": "command",
-    "command": "bun ~/claude-cli-statusline/debug.ts"
+    "command": "bun ~/claude-cli-statusline/tools/debug.ts"
   }
 }
 ```

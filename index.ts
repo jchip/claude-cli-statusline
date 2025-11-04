@@ -1,99 +1,134 @@
 #!/usr/bin/env bun
+
 /**
- * Claude CLI statusline
- * Displays: model · root dir · relative cwd · git branch · context remaining %
+ * Claude CLI Statusline
+ * Main entry point
  */
 
-import { loadConfig } from "./src/config";
-import { getContextInfo } from "./src/context";
-import { formatStatusLine } from "./src/formatter";
-import type { StatusLineInput } from "./src/types";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
+import { dirname } from "path";
+import type { StatusLineInput, SessionAnalysisCache } from "./src/types.ts";
+import { ConfigLoader } from "./src/services/ConfigLoader.ts";
+import { SessionAnalyzer } from "./src/services/SessionAnalyzer.ts";
+import { CacheManager } from "./src/services/CacheManager.ts";
+import { WorkDir } from "./src/components/WorkDir.ts";
+import { GitInfo } from "./src/components/GitInfo.ts";
+import { ModelInfo } from "./src/components/ModelInfo.ts";
+import { ContextInfo } from "./src/components/ContextInfo.ts";
+import { StatusLineComponents } from "./src/components/StatusLineComponents.ts";
 
 async function main() {
-  // Read input from stdin
-  const input: StatusLineInput = await new Response(process.stdin)
-    .json()
-    .catch(() => ({} as any));
+  // Step 1: Parse CLI arguments
+  const args = process.argv.slice(2);
+  const { configFile, colorLevels, saveSample, saveSampleFilename } =
+    ConfigLoader.parseArgs(args);
 
-  // Parse --config CLI flag (if specified, use it; otherwise use default)
-  const configArg = process.argv.find((arg) => arg.startsWith("--config="));
-  const configFile = configArg?.split("=")[1] || "statusline-config.json";
+  // Step 2: Read input from stdin
+  let inputText = "";
+  try {
+    inputText = readFileSync(0, "utf-8");
+  } catch {
+    // No input, use empty object
+  }
 
-  // Load config fresh on each run (allows dynamic changes)
-  const projectDir = input?.workspace?.project_dir;
-  const config = loadConfig(projectDir, configFile);
-
-  // Save sample input for debugging if enabled in config or via CLI flag
-  const saveSampleArg = process.argv.find((arg) =>
-    arg.startsWith("--save-sample")
-  );
-  if (config["save-sample"].enable || saveSampleArg) {
+  let input: StatusLineInput = {};
+  if (inputText.trim()) {
     try {
-      let filename = config["save-sample"].filename;
-      if (saveSampleArg && saveSampleArg.includes("=")) {
-        filename = saveSampleArg.split("=")[1];
-      }
-      const samplePath = import.meta.dir + "/" + filename;
-      await Bun.write(samplePath, JSON.stringify(input, null, 2));
-    } catch {
-      // Ignore errors
+      input = JSON.parse(inputText);
+    } catch (error) {
+      console.error("Failed to parse input JSON:", error);
     }
   }
 
-  // Get context level thresholds from config, can be overridden by CLI flag
-  let [greenThreshold, yellowThreshold, orangeThreshold] =
-    config["context-color-levels"];
+  // Step 3: Load configuration
+  const projectDir =
+    input?.workspace?.project_dir || input?.cwd || process.cwd();
+  let config = ConfigLoader.load(projectDir, configFile);
 
-  // CLI flag overrides config
-  const contextLevelsArg = process.argv.find((arg) =>
-    arg.startsWith("--context-levels=")
-  );
-  if (contextLevelsArg) {
-    try {
-      const values = contextLevelsArg
-        .split("=")[1]
-        .split(",")
-        .map((v) => parseInt(v.trim()));
-      if (
-        values.length === 3 &&
-        values.every((v) => !isNaN(v) && v >= 0 && v <= 100)
-      ) {
-        const [green, yellow, orange] = values;
-        // Ensure they are in descending order
-        if (green > yellow && yellow > orange) {
-          greenThreshold = green;
-          yellowThreshold = yellow;
-          orangeThreshold = orange;
-        }
-      }
-    } catch {
-      // Ignore parsing errors, use config values
-    }
-  }
-
-  // Get context percentage, used tokens, compact status, and cache saver
-  const {
-    percentage: pct,
-    usedTokens,
-    compactOccurred,
-    saveCache,
-  } = getContextInfo(config, input);
-
-  // Format and output statusline
-  const statusLine = formatStatusLine(
+  // Apply CLI overrides
+  config = ConfigLoader.applyOverrides(
     config,
-    input,
-    pct,
-    [greenThreshold, yellowThreshold, orangeThreshold],
-    usedTokens,
-    compactOccurred
+    colorLevels,
+    saveSample,
+    saveSampleFilename
   );
 
-  // Save the statusline output to cache for debugging
-  saveCache(statusLine);
+  // Step 4: Load cache early to get git info
+  const transcriptPath = input.transcript_path;
+  let analysisCache: SessionAnalysisCache | null = null;
+  let cachedGitRepoName: string | null | undefined;
+  let cachedGitBranch: string | null | undefined;
+  let usedTokens = 0;
+  let compactOccurred = false;
 
-  console.log(statusLine);
+  if (transcriptPath && existsSync(transcriptPath)) {
+    const analysis = SessionAnalyzer.analyzeTranscript(transcriptPath);
+    analysisCache = analysis.cache;
+    cachedGitRepoName = analysis.cache.gitRepoName;
+    cachedGitBranch = analysis.cache.gitBranch;
+    usedTokens = analysis.usedTokens;
+    compactOccurred = analysis.compactOccurred;
+  }
+
+  // Step 5: Gather component data (git uses input JSON, then cached values)
+  const workDir = WorkDir.fromInput(input, config["show-project-full-dir"] ?? false);
+  const git = GitInfo.fromDirectory(
+    projectDir,
+    input.transcript_path,
+    cachedGitRepoName,
+    cachedGitBranch,
+    input.gitBranch,
+    config["show-git-repo-name"] ?? false
+  );
+  const model = ModelInfo.fromInput(input, config);
+
+  // Step 6: Create context with analyzed data
+  const context = ContextInfo.fromData(
+    usedTokens,
+    model.maxTokens,
+    config["compact-buffer"],
+    compactOccurred,
+    config["context-color-levels"],
+    model.matchIndicator
+  );
+
+  // Step 7: Build and render status line
+  const components = new StatusLineComponents(workDir, git, model, context, config);
+  const output = components.render();
+
+  // Step 8: Output to stdout
+  process.stdout.write(output);
+
+  // Step 9: Save sample if requested
+  if (config["save-sample"].enable) {
+    try {
+      const samplePath = config["save-sample"].filename;
+      const sampleDir = dirname(samplePath);
+
+      if (!existsSync(sampleDir)) {
+        mkdirSync(sampleDir, { recursive: true });
+      }
+
+      writeFileSync(samplePath, JSON.stringify(input, null, 2), "utf-8");
+    } catch (error) {
+      console.error("Failed to save sample:", error);
+    }
+  }
+
+  // Step 10: Save cache with metadata (always at the end)
+  if (transcriptPath && analysisCache) {
+    CacheManager.write(
+      transcriptPath,
+      analysisCache,
+      input,
+      output,
+      git.repoName,
+      git.branch
+    );
+  }
 }
 
-// Run main function
-main();
+main().catch((error) => {
+  console.error("Fatal error:", error);
+  process.exit(1);
+});

@@ -13,6 +13,13 @@ export interface Config {
     enable: boolean;
     filename: string;
   };
+  "animations"?: {
+    enabled?: boolean;
+    "show-trend"?: boolean;
+    "show-sparkline"?: boolean;
+  };
+  "show-git-repo-name"?: boolean;
+  "show-project-full-dir"?: boolean;
 }
 
 export interface StatusLineInput {
@@ -32,10 +39,68 @@ export interface StatusLineInput {
   [key: string]: any;
 }
 
-export interface Colors {
-  green: string;
-  yellow: string;
-  orange: string;
-  red: string;
-  reset: string;
+export interface SessionCacheEntry {
+  line: number;
+  tokens: number;
+  isCompact?: boolean;
+  compactTrigger?: "manual" | "auto";
+  preCompactTokens?: number;
 }
+
+export interface SessionAnalysisCache {
+  lastLine: number;
+  lastTokenCount: number;
+  lastModified: number;
+  entries: SessionCacheEntry[];
+  gitRepoName?: string | null;
+  gitBranch?: string | null;
+  "statusline-input"?: StatusLineInput;
+  "statusline-output"?: string;
+}
+
+export interface TokenUsage {
+  input_tokens?: number;
+  cache_creation_input_tokens?: number;
+  cache_read_input_tokens?: number;
+  output_tokens?: number;
+}
+
+export interface TranscriptEntry {
+  type?: string;
+  subtype?: string;
+  message?: {
+    usage?: TokenUsage;
+  };
+  usage?: TokenUsage;
+  compactMetadata?: {
+    trigger?: "manual" | "auto";
+    preTokens?: number;
+    postTokens?: number;
+  };
+  gitBranch?: string;
+  [key: string]: any;
+}
+
+export interface ContextData {
+  usedTokens: number;
+  maxTokens: number;
+  remainingPercent: number;
+  remainingAfterBuffer: number;
+  compactOccurred: boolean;
+  modelMatchType: "id" | "displayName" | "default";
+}
+
+export interface ColorThresholds {
+  green: number;
+  yellow: number;
+  orange: number;
+}
+
+export const ANSI_COLORS = {
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  orange: "\x1b[38;5;208m",
+  red: "\x1b[31m",
+  lightBlue: "\x1b[36m", // Cyan - darker than 94
+  reset: "\x1b[0m",
+} as const;

@@ -1,79 +1,115 @@
-import { describe, it, expect } from "bun:test";
+import { describe, test, expect } from "bun:test";
 import {
   shortenHome,
   clamp,
   formatTokenCount,
   getRelativePath,
-} from "../src/utils";
+  basename,
+  findPercentInObject,
+} from "../src/utils.ts";
 
-describe("utils", () => {
-  describe("shortenHome", () => {
-    it("should replace home directory with ~", () => {
-      const home = process.env.HOME || "/home/user";
-      const path = `${home}/projects/myproject`;
-      expect(shortenHome(path)).toBe("~/projects/myproject");
-    });
-
-    it("should not modify paths not starting with home", () => {
-      const path = "/some/other/path";
-      expect(shortenHome(path)).toBe("/some/other/path");
-    });
+describe("shortenHome", () => {
+  test("replaces home directory with ~", () => {
+    const home = process.env.HOME || "";
+    expect(shortenHome(`${home}/projects`)).toBe("~/projects");
   });
 
-  describe("clamp", () => {
-    it("should return value within bounds", () => {
-      expect(clamp(50)).toBe(50);
-      expect(clamp(150)).toBe(100);
-      expect(clamp(-10)).toBe(0);
-    });
-
-    it("should work with custom bounds", () => {
-      expect(clamp(15, 10, 20)).toBe(15);
-      expect(clamp(5, 10, 20)).toBe(10);
-      expect(clamp(25, 10, 20)).toBe(20);
-    });
+  test("leaves non-home paths unchanged", () => {
+    expect(shortenHome("/usr/local/bin")).toBe("/usr/local/bin");
   });
 
-  describe("formatTokenCount", () => {
-    it("should format large numbers with M suffix", () => {
-      expect(formatTokenCount(1000000)).toBe("1M");
-      expect(formatTokenCount(1500000)).toBe("1.50M");
-      expect(formatTokenCount(1234567)).toBe("1.23M");
-    });
+  test("handles empty home", () => {
+    expect(shortenHome("/some/path")).toBe("/some/path");
+  });
+});
 
-    it("should format thousands with K suffix", () => {
-      expect(formatTokenCount(1000)).toBe("1K");
-      expect(formatTokenCount(1500)).toBe("1.50K");
-      expect(formatTokenCount(1234)).toBe("1.23K");
-    });
-
-    it("should return plain number for small values", () => {
-      expect(formatTokenCount(999)).toBe("999");
-      expect(formatTokenCount(100)).toBe("100");
-      expect(formatTokenCount(0)).toBe("0");
-    });
+describe("clamp", () => {
+  test("clamps value to range", () => {
+    expect(clamp(150, 0, 100)).toBe(100);
+    expect(clamp(-10, 0, 100)).toBe(0);
+    expect(clamp(50, 0, 100)).toBe(50);
   });
 
-  describe("getRelativePath", () => {
-    it("should return . for identical paths", () => {
-      expect(getRelativePath("/home/user/project", "/home/user/project")).toBe(
-        "."
-      );
-    });
+  test("uses default range 0-100", () => {
+    expect(clamp(150)).toBe(100);
+    expect(clamp(-10)).toBe(0);
+    expect(clamp(50)).toBe(50);
+  });
+});
 
-    it("should return relative path when cwd starts with root", () => {
-      expect(
-        getRelativePath("/home/user/project/src", "/home/user/project")
-      ).toBe("src");
-      expect(
-        getRelativePath("/home/user/project/src/utils", "/home/user/project")
-      ).toBe("src/utils");
-    });
+describe("formatTokenCount", () => {
+  const cyan = "\x1b[36m";
+  const reset = "\x1b[0m";
 
-    it("should return basename when cwd doesn't start with root", () => {
-      expect(getRelativePath("/some/other/path", "/home/user/project")).toBe(
-        "path"
-      );
-    });
+  test("formats thousands with K in cyan", () => {
+    expect(formatTokenCount(1000)).toBe(`1${cyan}K${reset}`);
+    expect(formatTokenCount(1500)).toBe(`1.5${cyan}K${reset}`);
+    expect(formatTokenCount(200000)).toBe(`200${cyan}K${reset}`);
+  });
+
+  test("formats millions with M in cyan", () => {
+    expect(formatTokenCount(1000000)).toBe(`1${cyan}M${reset}`);
+    expect(formatTokenCount(1500000)).toBe(`1.5${cyan}M${reset}`);
+  });
+
+  test("returns raw number for small values", () => {
+    expect(formatTokenCount(500)).toBe("500");
+    expect(formatTokenCount(999)).toBe("999");
+  });
+});
+
+describe("getRelativePath", () => {
+  test("returns relative path from root", () => {
+    expect(getRelativePath("/home/user/project/src", "/home/user/project")).toBe("src");
+    expect(getRelativePath("/home/user/project/src/components", "/home/user/project")).toBe(
+      "src/components"
+    );
+  });
+
+  test("returns . for same directory", () => {
+    expect(getRelativePath("/home/user/project", "/home/user/project")).toBe(".");
+  });
+
+  test("returns basename if not under root", () => {
+    expect(getRelativePath("/other/path", "/home/user/project")).toBe("path");
+  });
+
+  test("handles empty inputs", () => {
+    expect(getRelativePath("", "")).toBe(".");
+  });
+});
+
+describe("basename", () => {
+  test("returns last component of path", () => {
+    expect(basename("/home/user/project")).toBe("project");
+    expect(basename("/usr/local/bin")).toBe("bin");
+  });
+
+  test("handles trailing slash", () => {
+    expect(basename("/home/user/project/")).toBe("project");
+  });
+
+  test("handles root path", () => {
+    expect(basename("/")).toBe("");
+  });
+});
+
+describe("findPercentInObject", () => {
+  test("finds percent field in object", () => {
+    expect(findPercentInObject({ percent: 75 })).toBe(75);
+  });
+
+  test("finds percent field in nested object", () => {
+    expect(findPercentInObject({ budget: { percent: 50 } })).toBe(50);
+  });
+
+  test("returns null if not found", () => {
+    expect(findPercentInObject({ value: 100 })).toBeNull();
+  });
+
+  test("returns null for non-objects", () => {
+    expect(findPercentInObject(null)).toBeNull();
+    expect(findPercentInObject("string")).toBeNull();
+    expect(findPercentInObject(42)).toBeNull();
   });
 });
