@@ -37,6 +37,14 @@ export class WorkDir {
     return WorkDirRenderer.render(this.data);
   }
 
+  renderProject(): string {
+    return WorkDirRenderer.renderProject(this.data);
+  }
+
+  renderCwd(): string {
+    return WorkDirRenderer.renderCwd(this.data);
+  }
+
   static fromInput(input: any, showFullDir: boolean = false): WorkDir {
     const projectDir =
       input?.workspace?.project_dir || input?.cwd || process.cwd();

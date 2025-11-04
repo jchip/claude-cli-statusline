@@ -11,6 +11,7 @@ import { spinner } from "../logic/AnimationUtils.ts";
 
 export interface ContextRenderOptions {
   animated?: boolean;
+  spinnerStyle?: "transportation" | "weather" | "hearts" | "fruit" | "planets" | "circles" | "sports" | "flowers" | "hands" | "arrows" | "moon" | "clock" | "circular" | "braille" | "dots" | "blocks";
 }
 
 export class ContextRenderer {
@@ -58,7 +59,7 @@ export class ContextRenderer {
 
     // Add spinner after max context window if animated
     if (options.animated) {
-      parts.push(spinner());
+      parts.push(spinner(options.spinnerStyle || "transportation"));
     }
 
     return parts.join("");

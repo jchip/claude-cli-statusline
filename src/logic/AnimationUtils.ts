@@ -7,8 +7,8 @@
  * Time-based spinner (stateless)
  * Animates based on current time, no state needed
  */
-export function spinner(): string {
-  const frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]; // braille spinner
+export function spinner(style: keyof typeof SPINNER_STYLES = "transportation"): string {
+  const frames = SPINNER_STYLES[style];
   const idx = Math.floor(Date.now() / 120) % frames.length;
   return frames[idx];
 }
@@ -60,18 +60,29 @@ export function sparkline(values: number[]): string {
  * Alternative spinner styles
  */
 export const SPINNER_STYLES = {
+  transportation: ["🚗", "🚕", "🚙", "🚌", "🚎", "🚓", "🚑", "🚒"],
+  weather: ["☀️", "🌤️", "⛅", "🌥️", "☁️", "🌦️", "🌧️", "⛈️"],
+  hearts: ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"],
+  fruit: ["🍎", "🍊", "🍋", "🍏", "🫐", "🍇", "🍓", "🍒"],
+  planets: ["🌍", "🪐", "🌎", "🌏", "🌑", "🌒", "🌓", "🌔"],
+  circles: ["🔴", "🟠", "🟡", "🟢", "🔵", "🟣", "🟤", "⚫"],
+  sports: ["⚽", "🏀", "🏈", "⚾", "🎾", "🏐", "🏉", "🎱"],
+  flowers: ["🌹", "🌺", "🌻", "🌼", "🌷", "🌸", "💐", "🏵️"],
+  hands: ["✋", "🤚", "🖐️", "👌", "🤌", "🤏"],
+  arrows: ["➡️", "↗️", "⬆️", "↖️", "⬅️", "↙️", "⬇️", "↘️"],
+  moon: ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"],
+  clock: ["🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛"],
+  circular: ["◐", "◴", "◓", "◷", "◑", "◶", "◒", "◵"],
   braille: ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"],
   dots: ["⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈"],
-  circular: ["◐", "◓", "◑", "◒"],
   blocks: ["▖", "▘", "▝", "▗"],
-  clock: ["🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗"],
 } as const;
 
 /**
  * Get spinner frame with custom style
  */
 export function getSpinnerFrame(
-  style: keyof typeof SPINNER_STYLES = "braille",
+  style: keyof typeof SPINNER_STYLES = "transportation",
   speed = 120
 ): string {
   const frames = SPINNER_STYLES[style];

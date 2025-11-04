@@ -9,13 +9,23 @@ import {
 } from "../src/logic/AnimationUtils.ts";
 
 describe("AnimationUtils", () => {
-  test("spinner returns a braille character", () => {
+  test("spinner returns a transportation character by default", () => {
     const frame = spinner();
     expect(typeof frame).toBe("string");
     expect(frame.length).toBeGreaterThan(0);
-    // Should be one of the braille spinner frames
-    const brailleFrames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-    expect(brailleFrames).toContain(frame);
+    // Should be one of the transportation spinner frames
+    const transportationFrames = ["🚗", "🚕", "🚙", "🚌", "🚎", "🚓", "🚑", "🚒"];
+    expect(transportationFrames).toContain(frame);
+  });
+
+  test("spinner accepts custom style", () => {
+    const moonFrame = spinner("moon");
+    const moonFrames = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"];
+    expect(moonFrames).toContain(moonFrame);
+
+    const heartFrame = spinner("hearts");
+    const heartFrames = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"];
+    expect(heartFrames).toContain(heartFrame);
   });
 
   test("pulse returns a pulse character", () => {

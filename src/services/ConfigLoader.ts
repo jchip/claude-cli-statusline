@@ -22,9 +22,11 @@ export class ConfigLoader {
       enabled: false,
       "show-trend": false,
       "show-sparkline": false,
+      spinner: "transportation",
     },
     "show-git-repo-name": false,
     "show-project-full-dir": false,
+    "render-layout": "layout-1-line",
   };
 
   /**
@@ -110,11 +112,15 @@ export class ConfigLoader {
     colorLevels: [number, number, number] | null;
     saveSample: boolean;
     saveSampleFilename: string | null;
+    layout: string | null;
+    spinner: string | null;
   } {
     let configFile = "statusline-config.json";
     let colorLevels: [number, number, number] | null = null;
     let saveSample = false;
     let saveSampleFilename: string | null = null;
+    let layout: string | null = null;
+    let spinner: string | null = null;
 
     for (const arg of args) {
       if (arg.startsWith("--config=")) {
@@ -138,10 +144,14 @@ export class ConfigLoader {
       } else if (arg.startsWith("--save-sample=")) {
         saveSample = true;
         saveSampleFilename = arg.slice("--save-sample=".length);
+      } else if (arg.startsWith("--layout=")) {
+        layout = arg.slice("--layout=".length);
+      } else if (arg.startsWith("--spinner=")) {
+        spinner = arg.slice("--spinner=".length);
       }
     }
 
-    return { configFile, colorLevels, saveSample, saveSampleFilename };
+    return { configFile, colorLevels, saveSample, saveSampleFilename, layout, spinner };
   }
 
   /**
@@ -151,7 +161,9 @@ export class ConfigLoader {
     config: Config,
     colorLevels: [number, number, number] | null,
     saveSample: boolean,
-    saveSampleFilename: string | null
+    saveSampleFilename: string | null,
+    layout: string | null,
+    spinner: string | null
   ): Config {
     const result = { ...config };
 
@@ -163,6 +175,17 @@ export class ConfigLoader {
       result["save-sample"] = {
         enable: true,
         filename: saveSampleFilename || result["save-sample"].filename,
+      };
+    }
+
+    if (layout) {
+      result["render-layout"] = layout;
+    }
+
+    if (spinner) {
+      result.animations = {
+        ...result.animations,
+        spinner: spinner as any,
       };
     }
 

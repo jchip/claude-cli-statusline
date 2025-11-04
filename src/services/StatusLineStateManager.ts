@@ -1,6 +1,10 @@
 /**
  * State manager for statusline trends and sparklines
  * Persists minimal state for animation effects
+ *
+ * @deprecated This class is no longer used. Animation state is now stored
+ * in the session cache file (transcript.json.cache.json) to avoid conflicts
+ * between multiple Claude sessions. See SessionAnalysisCache.animationState
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
@@ -12,6 +16,9 @@ export interface StatusLineState {
   lastUpdated?: number;
 }
 
+/**
+ * @deprecated Use SessionAnalysisCache.animationState instead
+ */
 export class StatusLineStateManager {
   private static readonly STATE_FILE = ".statusline.state.json";
   private static readonly MAX_SERIES_LENGTH = 24;

@@ -59,8 +59,15 @@ Or with a custom config file:
 
 ## What it shows
 
+**Default (single line):**
 ```
-📦 project-name 📁 relative/dir 🐙 ⎇branch 🧠 Model ⏬ 89%✦67%⚡️200K
+📦 project-name 📁 relative/dir 🐙 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
+```
+
+**With `"render-layout": "layout-2-line"` (two lines):**
+```
+📦 project-name 📁 relative/dir
+🐙 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
 ```
 
 **Icons:**
@@ -90,22 +97,55 @@ Or with a custom config file:
 - 🟠 Orange: 20-45% remaining
 - 🔴 Red: <20% remaining
 
+**Layout:**
+
+The statusline uses a single-line layout by default. You can customize the layout using the `render-layout` config option or the `--layout` CLI flag. See the [render-layout](#render-layout) section for details.
+
 ## Animation Features (Optional)
 
-The statusline supports optional animations to make it feel more alive:
+The statusline supports an optional animated spinner with multiple style choices:
 
-- **Spinner:** Animated braille spinner (⠸ ⠙ ⠹...) instead of static ⏬
-- **Trend arrow:** Shows direction of change (↗ ↘ →)
-- **Sparkline:** Mini bar chart of recent usage (▂▄▅▆█)
+**Available spinner styles:**
+- `transportation` (default): 🚗 🚕 🚙 🚌 🚎 🚓 🚑 🚒
+- `weather`: ☀️ 🌤️ ⛅ 🌥️ ☁️ 🌦️ 🌧️ ⛈️
+- `hearts`: ❤️ 🧡 💛 💚 💙 💜 🖤 🤍
+- `fruit`: 🍎 🍊 🍋 🍏 🫐 🍇 🍓 🍒
+- `planets`: 🌍 🪐 🌎 🌏 🌑 🌒 🌓 🌔
+- `circles`: 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫
+- `sports`: ⚽ 🏀 🏈 ⚾ 🎾 🏐 🏉 🎱
+- `flowers`: 🌹 🌺 🌻 🌼 🌷 🌸 💐 🏵️
+- `hands`: ✋ 🤚 🖐️ 👌 🤌 🤏
+- `arrows`: ➡️ ↗️ ⬆️ ↖️ ⬅️ ↙️ ⬇️ ↘️
+- `moon`: 🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
+- `clock`: 🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛
+- `circular`: ◐ ◴ ◓ ◷ ◑ ◶ ◒ ◵
+- `braille`: ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏
+- `dots`: ⠁ ⠂ ⠄ ⡀ ⢀ ⠠ ⠐ ⠈
+- `blocks`: ▖ ▘ ▝ ▗
 
-**Example with animations:**
+**Example with animations (transportation):**
 ```
-⠸ 75%✦52%⚡️200K⠧ ↗▂▄▅▆█
+🚗 75%✦52%⚡️200K🚌
+```
+
+**Enable animations in config:**
+
+```json
+{
+  "animations": {
+    "enabled": true,
+    "spinner": "transportation"
+  }
+}
+```
+
+**Or use CLI:**
+
+```bash
+bun ~/claude-cli-statusline/index.ts --spinner=hearts
 ```
 
 Note: When animations are enabled, the spinner appears after the max context window.
-
-See [docs/ANIMATIONS.md](docs/ANIMATIONS.md) for details and configuration.
 
 **Note:** Animations are **disabled by default** to maintain a clean, static statusline.
 
@@ -184,6 +224,47 @@ Or with custom filename:
   }
 }
 ```
+
+### `--layout=<layout>`
+
+Specify the statusline layout. Can be a predefined layout name or a custom layout name you've defined.
+
+**Predefined layouts:**
+- `layout-1-line` - Single line with all components (default)
+- `layout-2-line` - Two lines
+
+**Example:**
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bun ~/claude-cli-statusline/index.ts --layout=layout-1-line"
+  }
+}
+```
+
+**Note:** This CLI flag overrides the `render-layout` setting in the config file.
+
+### `--spinner=<style>`
+
+Specify the animated spinner style. Choose from 16 different styles.
+
+**Available styles:**
+`transportation`, `weather`, `hearts`, `fruit`, `planets`, `circles`, `sports`, `flowers`, `hands`, `arrows`, `moon`, `clock`, `circular`, `braille`, `dots`, `blocks`
+
+**Example:**
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bun ~/claude-cli-statusline/index.ts --spinner=hearts"
+  }
+}
+```
+
+**Note:** This CLI flag overrides the `animations.spinner` setting in the config file. Animations must be enabled separately with `animations.enabled: true` in your config.
 
 ## Config
 
@@ -369,6 +450,73 @@ When `true`:
 ```
 
 **Why disabled by default:** The basename is usually sufficient and keeps the statusline more concise. Enable it if you need to distinguish between multiple projects with the same name in different locations.
+
+### `render-layout`
+
+Controls the layout and ordering of statusline components. You can use predefined layouts or create custom layouts.
+
+**Default:** `"layout-1-line"` (single line layout)
+
+**Predefined Layouts:**
+- `"layout-1-line"` - Single line with all components (default): `["project cwd git model context"]`
+- `"layout-2-line"` - Two lines: `["project cwd", "git model context"]`
+
+**Available components for custom layouts:**
+- `project` - Project directory (📦 project-name)
+- `cwd` - Current working directory (📁 relative/path)
+- `git` - Git info (🐙 ⎇ branch)
+- `model` - Model name (🧠 Model)
+- `context` - Context usage (⏬ 89%✦67%⚡️200K)
+
+**Examples:**
+
+Using predefined single-line layout:
+```json
+{
+  "render-layout": "layout-1-line"
+}
+```
+
+Using predefined two-line layout:
+```json
+{
+  "render-layout": "layout-2-line"
+}
+```
+
+Custom single line:
+```json
+{
+  "render-layout": ["project cwd git model context"]
+}
+```
+
+Custom two lines:
+```json
+{
+  "render-layout": [
+    "project cwd",
+    "git model context"
+  ]
+}
+```
+
+Custom order (context first):
+```json
+{
+  "render-layout": [
+    "context model",
+    "project cwd git"
+  ]
+}
+```
+
+Minimal (git and context only):
+```json
+{
+  "render-layout": ["git context"]
+}
+```
 
 ## Development
 

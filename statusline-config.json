@@ -30,8 +30,10 @@
     "filename": ".temp/sample-input.json"
   },
   "animations": {
-    "enabled": true
+    "enabled": true,
+    "spinner": "transportation"
   },
   "show-git-repo-name": false,
-  "show-project-full-dir": false
+  "show-project-full-dir": false,
+  "render-layout": "layout-1-line"
 }

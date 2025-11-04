@@ -20,7 +20,7 @@ import { StatusLineComponents } from "./src/components/StatusLineComponents.ts";
 async function main() {
   // Step 1: Parse CLI arguments
   const args = process.argv.slice(2);
-  const { configFile, colorLevels, saveSample, saveSampleFilename } =
+  const { configFile, colorLevels, saveSample, saveSampleFilename, layout, spinner } =
     ConfigLoader.parseArgs(args);
 
   // Step 2: Read input from stdin
@@ -50,7 +50,9 @@ async function main() {
     config,
     colorLevels,
     saveSample,
-    saveSampleFilename
+    saveSampleFilename,
+    layout,
+    spinner
   );
 
   // Step 4: Load cache early to get git info

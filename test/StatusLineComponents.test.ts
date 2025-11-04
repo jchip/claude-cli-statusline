@@ -141,4 +141,242 @@ describe("StatusLineComponents", () => {
 
     expect(output).toContain("src/components"); // Relative path
   });
+
+  test("renders with custom single-line layout", () => {
+    const workDir = new WorkDir("/home/user/project", "/home/user/project");
+    const git = new GitInfo("project", "main", "project");
+    const model = new ModelInfo("test-id", "Sonnet 4.5", "Sonnet 4.5", 200000, "id");
+    const context = new ContextInfo(50000, 200000, 45000, false, {
+      green: 65,
+      yellow: 45,
+      orange: 20,
+    });
+
+    const config = {
+      "context-color-levels": [65, 45, 20] as [number, number, number],
+      "model-context-windows": {},
+      "display-name-model-context-windows": {},
+      "model-display-name-map": {},
+      "default-context-window": 200000,
+      "compact-buffer": 45000,
+      "save-sample": { enable: false, filename: "" },
+      "render-layout": ["project cwd git model context"],
+    };
+
+    const components = new StatusLineComponents(workDir, git, model, context, config);
+    const output = components.render();
+
+    // Should be single line (no newline)
+    expect(output).not.toContain("\n");
+    expect(output).toContain("📦");
+    expect(output).toContain("📁");
+    expect(output).toContain("🐙");
+    expect(output).toContain("🧠");
+    expect(output).toContain("⏬");
+  });
+
+  test("renders with custom two-line layout", () => {
+    const workDir = new WorkDir("/home/user/project", "/home/user/project");
+    const git = new GitInfo("project", "main", "project");
+    const model = new ModelInfo("test-id", "Sonnet 4.5", "Sonnet 4.5", 200000, "id");
+    const context = new ContextInfo(50000, 200000, 45000, false, {
+      green: 65,
+      yellow: 45,
+      orange: 20,
+    });
+
+    const config = {
+      "context-color-levels": [65, 45, 20] as [number, number, number],
+      "model-context-windows": {},
+      "display-name-model-context-windows": {},
+      "model-display-name-map": {},
+      "default-context-window": 200000,
+      "compact-buffer": 45000,
+      "save-sample": { enable: false, filename: "" },
+      "render-layout": ["project cwd", "git model context"],
+    };
+
+    const components = new StatusLineComponents(workDir, git, model, context, config);
+    const output = components.render();
+
+    const lines = output.split("\n");
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toContain("📦");
+    expect(lines[0]).toContain("📁");
+    expect(lines[1]).toContain("🐙");
+    expect(lines[1]).toContain("🧠");
+    expect(lines[1]).toContain("⏬");
+  });
+
+  test("renders with custom component order", () => {
+    const workDir = new WorkDir("/home/user/project", "/home/user/project");
+    const git = new GitInfo("project", "main", "project");
+    const model = new ModelInfo("test-id", "Sonnet 4.5", "Sonnet 4.5", 200000, "id");
+    const context = new ContextInfo(50000, 200000, 45000, false, {
+      green: 65,
+      yellow: 45,
+      orange: 20,
+    });
+
+    const config = {
+      "context-color-levels": [65, 45, 20] as [number, number, number],
+      "model-context-windows": {},
+      "display-name-model-context-windows": {},
+      "model-display-name-map": {},
+      "default-context-window": 200000,
+      "compact-buffer": 45000,
+      "save-sample": { enable: false, filename: "" },
+      "render-layout": ["context model", "project cwd git"],
+    };
+
+    const components = new StatusLineComponents(workDir, git, model, context, config);
+    const output = components.render();
+
+    const lines = output.split("\n");
+    expect(lines).toHaveLength(2);
+
+    // First line should have context and model
+    expect(lines[0]).toContain("⏬");
+    expect(lines[0]).toContain("🧠");
+
+    // Second line should have project, cwd, and git
+    expect(lines[1]).toContain("📦");
+    expect(lines[1]).toContain("📁");
+    expect(lines[1]).toContain("🐙");
+  });
+
+  test("renders with minimal layout (only git and context)", () => {
+    const workDir = new WorkDir("/home/user/project", "/home/user/project");
+    const git = new GitInfo("project", "main", "project");
+    const model = new ModelInfo("test-id", "Sonnet 4.5", "Sonnet 4.5", 200000, "id");
+    const context = new ContextInfo(50000, 200000, 45000, false, {
+      green: 65,
+      yellow: 45,
+      orange: 20,
+    });
+
+    const config = {
+      "context-color-levels": [65, 45, 20] as [number, number, number],
+      "model-context-windows": {},
+      "display-name-model-context-windows": {},
+      "model-display-name-map": {},
+      "default-context-window": 200000,
+      "compact-buffer": 45000,
+      "save-sample": { enable: false, filename: "" },
+      "render-layout": ["git context"],
+    };
+
+    const components = new StatusLineComponents(workDir, git, model, context, config);
+    const output = components.render();
+
+    // Should only contain git and context
+    expect(output).toContain("🐙");
+    expect(output).toContain("⏬");
+
+    // Should not contain project or cwd icons
+    expect(output).not.toContain("📦");
+    expect(output).not.toContain("📁");
+
+    // Should not contain model icon
+    expect(output).not.toContain("🧠");
+  });
+
+  test("uses default layout when render-layout not specified", () => {
+    const workDir = new WorkDir("/home/user/project", "/home/user/project");
+    const git = new GitInfo("project", "main", "project");
+    const model = new ModelInfo("test-id", "Sonnet 4.5", "Sonnet 4.5", 200000, "id");
+    const context = new ContextInfo(50000, 200000, 45000, false, {
+      green: 65,
+      yellow: 45,
+      orange: 20,
+    });
+
+    const config = {
+      "context-color-levels": [65, 45, 20] as [number, number, number],
+      "model-context-windows": {},
+      "display-name-model-context-windows": {},
+      "model-display-name-map": {},
+      "default-context-window": 200000,
+      "compact-buffer": 45000,
+      "save-sample": { enable: false, filename: "" },
+    };
+
+    const components = new StatusLineComponents(workDir, git, model, context, config);
+    const output = components.render();
+
+    // Default layout is layout-1-line (single line)
+    expect(output).not.toContain("\n");
+    expect(output).toContain("📦");
+    expect(output).toContain("📁");
+    expect(output).toContain("🐙");
+    expect(output).toContain("🧠");
+    expect(output).toContain("⏬");
+  });
+
+  test("renders with predefined layout-1-line", () => {
+    const workDir = new WorkDir("/home/user/project", "/home/user/project");
+    const git = new GitInfo("project", "main", "project");
+    const model = new ModelInfo("test-id", "Sonnet 4.5", "Sonnet 4.5", 200000, "id");
+    const context = new ContextInfo(50000, 200000, 45000, false, {
+      green: 65,
+      yellow: 45,
+      orange: 20,
+    });
+
+    const config = {
+      "context-color-levels": [65, 45, 20] as [number, number, number],
+      "model-context-windows": {},
+      "display-name-model-context-windows": {},
+      "model-display-name-map": {},
+      "default-context-window": 200000,
+      "compact-buffer": 45000,
+      "save-sample": { enable: false, filename: "" },
+      "render-layout": "layout-1-line" as const,
+    };
+
+    const components = new StatusLineComponents(workDir, git, model, context, config);
+    const output = components.render();
+
+    // Should be single line
+    expect(output).not.toContain("\n");
+    expect(output).toContain("📦");
+    expect(output).toContain("📁");
+    expect(output).toContain("🐙");
+    expect(output).toContain("🧠");
+    expect(output).toContain("⏬");
+  });
+
+  test("renders with predefined layout-2-line", () => {
+    const workDir = new WorkDir("/home/user/project", "/home/user/project");
+    const git = new GitInfo("project", "main", "project");
+    const model = new ModelInfo("test-id", "Sonnet 4.5", "Sonnet 4.5", 200000, "id");
+    const context = new ContextInfo(50000, 200000, 45000, false, {
+      green: 65,
+      yellow: 45,
+      orange: 20,
+    });
+
+    const config = {
+      "context-color-levels": [65, 45, 20] as [number, number, number],
+      "model-context-windows": {},
+      "display-name-model-context-windows": {},
+      "model-display-name-map": {},
+      "default-context-window": 200000,
+      "compact-buffer": 45000,
+      "save-sample": { enable: false, filename: "" },
+      "render-layout": "layout-2-line" as const,
+    };
+
+    const components = new StatusLineComponents(workDir, git, model, context, config);
+    const output = components.render();
+
+    // Should be two lines
+    const lines = output.split("\n");
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toContain("📦");
+    expect(lines[0]).toContain("📁");
+    expect(lines[1]).toContain("🐙");
+    expect(lines[1]).toContain("🧠");
+    expect(lines[1]).toContain("⏬");
+  });
 });

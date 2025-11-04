@@ -17,9 +17,11 @@ export interface Config {
     enabled?: boolean;
     "show-trend"?: boolean;
     "show-sparkline"?: boolean;
+    spinner?: "transportation" | "weather" | "hearts" | "fruit" | "planets" | "circles" | "sports" | "flowers" | "hands" | "arrows" | "moon" | "clock" | "circular" | "braille" | "dots" | "blocks";
   };
   "show-git-repo-name"?: boolean;
   "show-project-full-dir"?: boolean;
+  "render-layout"?: string[] | string;
 }
 
 export interface StatusLineInput {
@@ -103,4 +105,9 @@ export const ANSI_COLORS = {
   red: "\x1b[31m",
   lightBlue: "\x1b[36m", // Cyan - darker than 94
   reset: "\x1b[0m",
+} as const;
+
+export const PREDEFINED_LAYOUTS = {
+  "layout-1-line": ["project cwd git model context"],
+  "layout-2-line": ["project cwd", "git model context"],
 } as const;

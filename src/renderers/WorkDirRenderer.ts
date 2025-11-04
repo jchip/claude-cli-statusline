@@ -20,4 +20,18 @@ export class WorkDirRenderer {
 
     return parts.join(" ");
   }
+
+  /**
+   * Render only project directory
+   */
+  static renderProject(data: WorkDirData): string {
+    return `${Icons.WORKDIR} ${data.projectDirDisplay}`;
+  }
+
+  /**
+   * Render only current working directory
+   */
+  static renderCwd(data: WorkDirData): string {
+    return `${Icons.CURRENT_DIR} ${data.relativePath}`;
+  }
 }
