@@ -80,7 +80,8 @@ async function main() {
     cachedGitRepoName,
     cachedGitBranch,
     input.gitBranch,
-    config["show-git-repo-name"] ?? false
+    config["show-git-repo-name"] ?? false,
+    config["git-status-icons"]
   );
   const model = ModelInfo.fromInput(input, config);
 

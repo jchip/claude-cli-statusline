@@ -22,6 +22,11 @@ export interface Config {
   "show-git-repo-name"?: boolean;
   "show-project-full-dir"?: boolean;
   "render-layout"?: string[] | string;
+  "git-status-icons"?: {
+    clean: string;
+    dirty: string;
+    staged: string;
+  };
 }
 
 export interface StatusLineInput {

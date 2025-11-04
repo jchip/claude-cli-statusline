@@ -9,16 +9,20 @@ import { GitResolver } from "../logic/GitResolver.ts";
 
 export class GitInfo {
   private data: GitData;
+  private statusIcons?: { clean: string; dirty: string; staged: string };
 
   constructor(
     public readonly repoName: string | null,
     public readonly branch: string | null,
     public readonly projectDirBasename: string,
     showGitRepoNameConfig: boolean = false,
-    public readonly isClean: boolean | null = null
+    public readonly isClean: boolean | null = null,
+    public readonly hasStaged: boolean | null = null,
+    statusIcons?: { clean: string; dirty: string; staged: string }
   ) {
     // Create data model
-    this.data = new GitData(repoName, branch, projectDirBasename, showGitRepoNameConfig, isClean);
+    this.data = new GitData(repoName, branch, projectDirBasename, showGitRepoNameConfig, isClean, hasStaged);
+    this.statusIcons = statusIcons;
   }
 
   // Getters for backward compatibility
@@ -31,7 +35,7 @@ export class GitInfo {
   }
 
   render(): string {
-    return GitRenderer.render(this.data);
+    return GitRenderer.render(this.data, this.statusIcons);
   }
 
   static fromDirectory(
@@ -40,7 +44,8 @@ export class GitInfo {
     cachedRepoName?: string | null,
     cachedBranch?: string | null,
     inputGitBranch?: string,
-    showGitRepoNameConfig: boolean = false
+    showGitRepoNameConfig: boolean = false,
+    statusIcons?: { clean: string; dirty: string; staged: string }
   ): GitInfo {
     const projectDirBasename = GitResolver.getProjectDirBasename(dir);
 
@@ -62,6 +67,9 @@ export class GitInfo {
     // Check working tree status
     const isClean = GitResolver.resolveWorkingTreeStatus(branch, dir);
 
-    return new GitInfo(repoName, branch, projectDirBasename, showGitRepoNameConfig, isClean);
+    // Check staged status
+    const hasStaged = GitResolver.resolveStagedStatus(branch, dir);
+
+    return new GitInfo(repoName, branch, projectDirBasename, showGitRepoNameConfig, isClean, hasStaged, statusIcons);
   }
 }

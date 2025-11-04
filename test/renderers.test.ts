@@ -83,7 +83,7 @@ describe("GitRenderer", () => {
     const data = new GitData("project", "main", "project", false, true);
     const output = GitRenderer.render(data);
 
-    expect(output).toContain("✓");
+    expect(output).toContain("💎");
     expect(output).toContain("\x1b[32m"); // Green color
   });
 
@@ -91,7 +91,7 @@ describe("GitRenderer", () => {
     const data = new GitData("project", "main", "project", false, false);
     const output = GitRenderer.render(data);
 
-    expect(output).toContain("✗");
+    expect(output).toContain("🛠️");
     expect(output).toContain("\x1b[33m"); // Yellow color
   });
 
@@ -101,6 +101,34 @@ describe("GitRenderer", () => {
 
     expect(output).not.toContain("✓");
     expect(output).not.toContain("✗");
+  });
+
+  test("renders git info with staged changes", () => {
+    const data = new GitData("project", "main", "project", false, true, true);
+    const output = GitRenderer.render(data);
+
+    expect(output).toContain("📤"); // Staged icon
+    expect(output).not.toContain("💎"); // No clean icon when staged
+    expect(output).toContain("\x1b[36m"); // Light blue color for staged
+  });
+
+  test("renders git info with staged and dirty", () => {
+    const data = new GitData("project", "main", "project", false, false, true);
+    const output = GitRenderer.render(data);
+
+    expect(output).toContain("📤"); // Staged icon
+    expect(output).toContain("🛠️"); // Dirty icon
+    expect(output).toContain("\x1b[36m"); // Light blue color for staged
+    expect(output).toContain("\x1b[33m"); // Yellow color for dirty
+  });
+
+  test("renders git info with only staged (no clean/dirty info)", () => {
+    const data = new GitData("project", "main", "project", false, null, true);
+    const output = GitRenderer.render(data);
+
+    expect(output).toContain("📤"); // Staged icon
+    expect(output).not.toContain("💎"); // No clean icon
+    expect(output).not.toContain("🛠️"); // No dirty icon
   });
 });
 

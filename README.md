@@ -453,6 +453,39 @@ When `true`:
 
 **Why disabled by default:** The basename is usually sufficient and keeps the statusline more concise. Enable it if you need to distinguish between multiple projects with the same name in different locations.
 
+### `git-status-icons`
+
+Customize the icons used to indicate git repository status (staged/clean/dirty).
+
+**Default:**
+```json
+{
+  "clean": "💎",
+  "dirty": "🛠️",
+  "staged": "📤"
+}
+```
+
+**Status combinations:**
+- Clean (no changes): `🐙💎` (octopus + gem in green)
+- Unstaged changes: `🐙🛠️` (octopus + tools in yellow)
+- Staged changes: `🐙📤` (octopus + outbox in light blue)
+- Staged + unstaged: `🐙📤🛠️` (staged with additional unstaged changes)
+
+**Example (using different icons):**
+
+```json
+{
+  "git-status-icons": {
+    "clean": "✓",
+    "dirty": "✗",
+    "staged": "→"
+  }
+}
+```
+
+**Note:** The icons are displayed directly adjacent to the octopus git icon (🐙) with no space between them. When there are staged changes, only the staged icon (📤) is shown. The dirty icon (🛠️) is only shown if there are unstaged changes. The clean icon (💎) is only shown when there are no changes at all (no staged, no unstaged).
+
 ### `render-layout`
 
 Controls the layout and ordering of statusline components. You can use predefined layouts or create custom layouts.

@@ -18,6 +18,7 @@ export class Icons {
   static readonly NO_GIT = "∅";
   static readonly NO_CONTEXT = "💤";
   static readonly DIR_SEPARATOR = "›"; // Deprecated: use SEPARATOR_DIR
-  static readonly GIT_CLEAN = "✓";
-  static readonly GIT_DIRTY = "✗";
+  static readonly GIT_CLEAN = "💎";
+  static readonly GIT_DIRTY = "🛠️";
+  static readonly GIT_STAGED = "📤";
 }

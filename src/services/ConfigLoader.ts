@@ -27,6 +27,11 @@ export class ConfigLoader {
     "show-git-repo-name": false,
     "show-project-full-dir": false,
     "render-layout": "layout-1-line",
+    "git-status-icons": {
+      clean: "💎",
+      dirty: "🛠️",
+      staged: "📤",
+    },
   };
 
   /**

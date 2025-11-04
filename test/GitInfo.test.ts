@@ -71,14 +71,14 @@ describe("GitInfo", () => {
   test("renders with clean working tree status", () => {
     const git = new GitInfo("project", "main", "project", false, true);
     const output = git.render();
-    expect(output).toContain("✓");
+    expect(output).toContain("💎");
     expect(output).toContain("\x1b[32m"); // Green color
   });
 
   test("renders with dirty working tree status", () => {
     const git = new GitInfo("project", "main", "project", false, false);
     const output = git.render();
-    expect(output).toContain("✗");
+    expect(output).toContain("🛠️");
     expect(output).toContain("\x1b[33m"); // Yellow color
   });
 
@@ -87,6 +87,20 @@ describe("GitInfo", () => {
     const output = git.render();
     expect(output).not.toContain("✓");
     expect(output).not.toContain("✗");
+  });
+
+  test("renders with staged changes", () => {
+    const git = new GitInfo("project", "main", "project", false, true, true);
+    const output = git.render();
+    expect(output).toContain("📤"); // Staged icon
+    expect(output).not.toContain("💎"); // No clean icon when staged
+  });
+
+  test("renders with staged and dirty", () => {
+    const git = new GitInfo("project", "main", "project", false, false, true);
+    const output = git.render();
+    expect(output).toContain("📤"); // Staged icon
+    expect(output).toContain("🛠️"); // Dirty icon
   });
 
   test("renders with repo name same as project dir and config enabled", () => {

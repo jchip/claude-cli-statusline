@@ -87,4 +87,19 @@ export class GitResolver {
 
     return GitService.isWorkingTreeClean(dir);
   }
+
+  /**
+   * Check if there are staged changes
+   * Only runs if branch exists
+   */
+  static resolveStagedStatus(
+    branch: string | null,
+    dir: string
+  ): boolean | null {
+    if (!branch) {
+      return null;
+    }
+
+    return GitService.hasStagedChanges(dir);
+  }
 }
