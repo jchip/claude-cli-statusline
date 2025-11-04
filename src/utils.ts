@@ -30,7 +30,7 @@ export function formatTokenCount(tokens: number): string {
   if (tokens >= 1_000_000) {
     const m = tokens / 1_000_000;
     const num = m % 1 === 0 ? `${m}` : `${m.toFixed(1)}`;
-    return `${num}${cyan}M${reset}`;
+    return `${num}${cyan}M${reset}🚀`;
   }
   if (tokens >= 1000) {
     const k = tokens / 1000;
