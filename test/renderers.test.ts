@@ -78,6 +78,30 @@ describe("GitRenderer", () => {
     expect(output).toContain("⎇");
     expect(output).toContain("feature");
   });
+
+  test("renders git info with clean working tree status", () => {
+    const data = new GitData("project", "main", "project", false, true);
+    const output = GitRenderer.render(data);
+
+    expect(output).toContain("✓");
+    expect(output).toContain("\x1b[32m"); // Green color
+  });
+
+  test("renders git info with dirty working tree status", () => {
+    const data = new GitData("project", "main", "project", false, false);
+    const output = GitRenderer.render(data);
+
+    expect(output).toContain("✗");
+    expect(output).toContain("\x1b[33m"); // Yellow color
+  });
+
+  test("renders git info without status when isClean is null", () => {
+    const data = new GitData("project", "main", "project", false, null);
+    const output = GitRenderer.render(data);
+
+    expect(output).not.toContain("✓");
+    expect(output).not.toContain("✗");
+  });
 });
 
 describe("ModelRenderer", () => {

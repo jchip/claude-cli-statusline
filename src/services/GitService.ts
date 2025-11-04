@@ -93,4 +93,22 @@ export class GitService {
 
     return null;
   }
+
+  /**
+   * Check if working tree is clean (no uncommitted changes)
+   */
+  static isWorkingTreeClean(dir: string): boolean | null {
+    try {
+      const result = spawnSync(["git", "-C", dir, "status", "--porcelain"]);
+
+      if (result.exitCode === 0) {
+        const output = result.stdout.toString().trim();
+        return output === ""; // Empty output means clean
+      }
+    } catch {
+      // Ignore error
+    }
+
+    return null;
+  }
 }

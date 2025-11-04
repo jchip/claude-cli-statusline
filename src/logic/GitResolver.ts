@@ -72,4 +72,19 @@ export class GitResolver {
   static getProjectDirBasename(dir: string): string {
     return basename(dir);
   }
+
+  /**
+   * Check if working tree is clean
+   * Only runs if branch exists
+   */
+  static resolveWorkingTreeStatus(
+    branch: string | null,
+    dir: string
+  ): boolean | null {
+    if (!branch) {
+      return null;
+    }
+
+    return GitService.isWorkingTreeClean(dir);
+  }
 }

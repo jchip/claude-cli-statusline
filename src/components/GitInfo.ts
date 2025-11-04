@@ -14,10 +14,11 @@ export class GitInfo {
     public readonly repoName: string | null,
     public readonly branch: string | null,
     public readonly projectDirBasename: string,
-    showGitRepoNameConfig: boolean = false
+    showGitRepoNameConfig: boolean = false,
+    public readonly isClean: boolean | null = null
   ) {
     // Create data model
-    this.data = new GitData(repoName, branch, projectDirBasename, showGitRepoNameConfig);
+    this.data = new GitData(repoName, branch, projectDirBasename, showGitRepoNameConfig, isClean);
   }
 
   // Getters for backward compatibility
@@ -58,6 +59,9 @@ export class GitInfo {
       dir
     );
 
-    return new GitInfo(repoName, branch, projectDirBasename, showGitRepoNameConfig);
+    // Check working tree status
+    const isClean = GitResolver.resolveWorkingTreeStatus(branch, dir);
+
+    return new GitInfo(repoName, branch, projectDirBasename, showGitRepoNameConfig, isClean);
   }
 }

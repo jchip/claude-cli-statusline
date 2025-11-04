@@ -26,6 +26,15 @@ export class GitRenderer {
     // Has git
     parts.push(Icons.GIT_REPO);
 
+    // Add working tree status if available (after octopus)
+    if (data.isClean !== null) {
+      if (data.isClean) {
+        parts.push(`${ANSI_COLORS.green}${Icons.GIT_CLEAN}${ANSI_COLORS.reset}`);
+      } else {
+        parts.push(`${ANSI_COLORS.yellow}${Icons.GIT_DIRTY}${ANSI_COLORS.reset}`);
+      }
+    }
+
     if (data.showRepoName) {
       // Show repo name when different from project dir (config enabled)
       parts.push(data.repoName!);

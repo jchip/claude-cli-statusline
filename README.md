@@ -61,13 +61,13 @@ Or with a custom config file:
 
 **Default (single line):**
 ```
-📦 project-name 📁 relative/dir 🐙 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
+📦 project-name 📁 relative/dir 🐙 ✓ ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
 ```
 
 **With `"render-layout": "layout-2-line"` (two lines):**
 ```
 📦 project-name 📁 relative/dir
-🐙 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
+🐙 ✓ ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
 ```
 
 **Icons:**
@@ -76,9 +76,11 @@ Or with a custom config file:
   - With `show-project-full-dir: true` in config: shows full path like `~/path/to/project`
 - 📁 Current relative directory
 - 🐙 Git repo (octopus icon only by default)
+  - ✓ Clean working tree (🟢 green) - no uncommitted changes
+  - ✗ Dirty working tree (🟡 yellow) - has uncommitted changes
   - With `show-git-repo-name: true` in config:
-    - `🐙 📦` when repo name matches directory name
-    - `🐙 repo-name` when repo name differs from directory name
+    - `🐙 ✓ 📦` when repo name matches directory name
+    - `🐙 ✓ repo-name` when repo name differs from directory name
   - Git repo name is extracted from remote URL (e.g., `git@github.com:user/my-repo.git` → `my-repo`)
 - ⎇ Git branch (🟢 green if in repo, 🟡 yellow if no repo)
   - ∅ No git repository

@@ -9,6 +9,17 @@ describe("GitInfo", () => {
     expect(git.projectDirBasename).toBe("project");
   });
 
+  test("creates GitInfo with working tree status", () => {
+    const git = new GitInfo("my-repo", "main", "project", false, true);
+    expect(git.isClean).toBe(true);
+
+    const gitDirty = new GitInfo("my-repo", "main", "project", false, false);
+    expect(gitDirty.isClean).toBe(false);
+
+    const gitNoStatus = new GitInfo("my-repo", "main", "project", false, null);
+    expect(gitNoStatus.isClean).toBeNull();
+  });
+
   test("hasGit returns true when branch exists", () => {
     const git = new GitInfo("repo", "main", "project");
     expect(git.hasGit).toBe(true);
@@ -55,6 +66,27 @@ describe("GitInfo", () => {
     expect(output).toContain("⎇");
     expect(output).toContain("main");
     expect(output).toContain("\x1b[32m"); // Green color for branch icon
+  });
+
+  test("renders with clean working tree status", () => {
+    const git = new GitInfo("project", "main", "project", false, true);
+    const output = git.render();
+    expect(output).toContain("✓");
+    expect(output).toContain("\x1b[32m"); // Green color
+  });
+
+  test("renders with dirty working tree status", () => {
+    const git = new GitInfo("project", "main", "project", false, false);
+    const output = git.render();
+    expect(output).toContain("✗");
+    expect(output).toContain("\x1b[33m"); // Yellow color
+  });
+
+  test("renders without status when isClean is null", () => {
+    const git = new GitInfo("project", "main", "project", false, null);
+    const output = git.render();
+    expect(output).not.toContain("✓");
+    expect(output).not.toContain("✗");
   });
 
   test("renders with repo name same as project dir and config enabled", () => {

@@ -8,7 +8,8 @@ export class GitData {
     public readonly repoName: string | null,
     public readonly branch: string | null,
     public readonly projectDirBasename: string,
-    public readonly showGitRepoNameConfig: boolean = false
+    public readonly showGitRepoNameConfig: boolean = false,
+    public readonly isClean: boolean | null = null
   ) {}
 
   get hasGit(): boolean {

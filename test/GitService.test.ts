@@ -98,4 +98,15 @@ describe("GitService", () => {
     // Cleanup
     rmSync(testDir, { recursive: true });
   });
+
+  test("checks if working tree is clean for valid git directory", () => {
+    const isClean = GitService.isWorkingTreeClean(process.cwd());
+    expect(isClean).not.toBeNull();
+    expect(typeof isClean).toBe("boolean");
+  });
+
+  test("returns null for working tree status in non-git directory", () => {
+    const isClean = GitService.isWorkingTreeClean("/tmp");
+    expect(isClean).toBeNull();
+  });
 });
