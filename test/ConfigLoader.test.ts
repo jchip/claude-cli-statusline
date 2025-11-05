@@ -167,4 +167,42 @@ describe("ConfigLoader", () => {
 
     expect(config["compact-buffer"]).toBe(45000);
   });
+
+  test("deep merges nested config objects", () => {
+    const configPath = join(claudeDir, "statusline-config.json");
+    writeFileSync(
+      configPath,
+      JSON.stringify({
+        "animations": {
+          "enabled": false,
+          // Only override enabled, should keep default spinner from package config
+        },
+        "git-status-icons": {
+          "clean": "✨",
+          // Only override clean, should keep default dirty and staged
+        },
+      })
+    );
+
+    const config = ConfigLoader.load(projectDir);
+
+    // Check animations deep merge
+    expect(config.animations.enabled).toBe(false); // User override
+    expect(config.animations.spinner).toBe("transportation"); // From default package config
+
+    // Check git-status-icons deep merge
+    expect(config["git-status-icons"].clean).toBe("✨"); // User override
+    expect(config["git-status-icons"].dirty).toBe("🛠️"); // From default
+    expect(config["git-status-icons"].staged).toBe("📤"); // From default
+  });
+
+  test("loads default config from package directory", () => {
+    // Test without any user config
+    const config = ConfigLoader.load(projectDir);
+
+    // Should load from statusline-config.json in package root
+    expect(config["model-context-windows"]["claude-sonnet-4-5-20250929"]).toBe(200000);
+    expect(config["model-context-windows"]["claude-sonnet-4-5-20250929[1m]"]).toBe(1000000);
+    expect(config["display-name-model-context-windows"]["Sonnet 4.5"]).toBe(200000);
+  });
 });
