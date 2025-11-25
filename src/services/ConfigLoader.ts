@@ -49,60 +49,57 @@ export class ConfigLoader {
 
   /**
    * Load configuration from file hierarchy
-   * Loads default config from package, then overlays user config
+   * Merges configs in order: default → user → project → project.local
    */
   static load(
     projectDir: string,
     configFile = "statusline-config.json"
   ): Config {
     // Load default config from package directory
-    const defaultConfig = this.loadDefaultConfig();
+    let config = this.loadDefaultConfig();
 
-    // Find user config
-    const userConfigPath = this.findUserConfigPath(projectDir, configFile);
+    // Find all config files
+    const configPaths = this.findAllConfigPaths(projectDir, configFile);
 
-    if (!userConfigPath) {
-      return defaultConfig;
-    }
-
-    try {
-      const content = readFileSync(userConfigPath, "utf-8");
-      const userConfig = JSON.parse(content);
-      // Deep merge user config into default config
-      return this.deepMerge(defaultConfig, userConfig);
-    } catch (error) {
-      console.error(`Failed to load config from ${userConfigPath}:`, error);
-      return defaultConfig;
-    }
-  }
-
-  /**
-   * Find user config file in hierarchy
-   * Order: absolute path → project/.claude → user ~/.claude
-   */
-  private static findUserConfigPath(
-    projectDir: string,
-    configFile: string
-  ): string | null {
-    // If absolute path, use directly
-    if (isAbsolute(configFile)) {
-      return existsSync(configFile) ? configFile : null;
-    }
-
-    const searchPaths = [
-      // Project level
-      join(projectDir, ".claude", configFile),
-      // User level
-      join(process.env.HOME || "", ".claude", configFile),
-    ];
-
-    for (const path of searchPaths) {
-      if (existsSync(path)) {
-        return path;
+    // Merge each config file in order
+    for (const configPath of configPaths) {
+      try {
+        const content = readFileSync(configPath, "utf-8");
+        const fileConfig = JSON.parse(content);
+        config = this.deepMerge(config, fileConfig);
+      } catch (error) {
+        console.error(`Failed to load config from ${configPath}:`, error);
       }
     }
 
-    return null;
+    return config;
+  }
+
+  /**
+   * Find all config files in hierarchy
+   * Order: user → project → project.local (or absolute path only if provided)
+   */
+  private static findAllConfigPaths(
+    projectDir: string,
+    configFile: string
+  ): string[] {
+    // If absolute path, use only that file
+    if (isAbsolute(configFile)) {
+      return existsSync(configFile) ? [configFile] : [];
+    }
+
+    const configDir = process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME || "", ".claude");
+
+    const searchPaths = [
+      // User level (from CLAUDE_CONFIG_DIR or ~/.claude)
+      join(configDir, configFile),
+      // Project level
+      join(projectDir, ".claude", configFile),
+      // Project local level
+      join(projectDir, ".claude", configFile.replace(/\.json$/, ".local.json")),
+    ];
+
+    return searchPaths.filter(existsSync);
   }
 
   /**

@@ -44,6 +44,30 @@ describe("ConfigLoader", () => {
     expect(config["context-color-levels"]).toEqual([70, 50, 30]);
   });
 
+  test("merges project.local.json over project.json", () => {
+    const projectConfig = join(claudeDir, "statusline-config.json");
+    const localConfig = join(claudeDir, "statusline-config.local.json");
+
+    writeFileSync(
+      projectConfig,
+      JSON.stringify({
+        "context-color-levels": [70, 50, 30],
+        "compact-buffer": 50000,
+      })
+    );
+
+    writeFileSync(
+      localConfig,
+      JSON.stringify({
+        "context-color-levels": [80, 60, 40],
+      })
+    );
+
+    const config = ConfigLoader.load(projectDir);
+    expect(config["context-color-levels"]).toEqual([80, 60, 40]); // From local
+    expect(config["compact-buffer"]).toBe(50000); // From project
+  });
+
   test("loads config from absolute path", () => {
     const configPath = join(testDir, "custom-config.json");
     writeFileSync(
@@ -204,5 +228,84 @@ describe("ConfigLoader", () => {
     expect(config["model-context-windows"]["claude-sonnet-4-5-20250929"]).toBe(200000);
     expect(config["model-context-windows"]["claude-sonnet-4-5-20250929[1m]"]).toBe(1000000);
     expect(config["display-name-model-context-windows"]["Sonnet 4.5"]).toBe(200000);
+  });
+
+  test("respects CLAUDE_CONFIG_DIR environment variable", () => {
+    const customConfigDir = join(testDir, "custom-claude-config");
+    mkdirSync(customConfigDir, { recursive: true });
+
+    const userConfigPath = join(customConfigDir, "statusline-config.json");
+    writeFileSync(
+      userConfigPath,
+      JSON.stringify({
+        "compact-buffer": 60000,
+      })
+    );
+
+    // Set CLAUDE_CONFIG_DIR
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = customConfigDir;
+
+    const config = ConfigLoader.load(projectDir);
+
+    // Restore original env
+    if (originalEnv === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
+
+    expect(config["compact-buffer"]).toBe(60000);
+  });
+
+  test("merges all configs in correct order: user → project → project.local", () => {
+    // Create user config directory
+    const userConfigDir = join(testDir, "user-claude");
+    mkdirSync(userConfigDir, { recursive: true });
+
+    const userConfig = join(userConfigDir, "statusline-config.json");
+    const projectConfig = join(claudeDir, "statusline-config.json");
+    const localConfig = join(claudeDir, "statusline-config.local.json");
+
+    // User config sets A and B
+    writeFileSync(
+      userConfig,
+      JSON.stringify({
+        "context-color-levels": [70, 50, 30],
+        "compact-buffer": 50000,
+      })
+    );
+
+    // Project config overrides A, keeps B
+    writeFileSync(
+      projectConfig,
+      JSON.stringify({
+        "context-color-levels": [75, 55, 35],
+      })
+    );
+
+    // Local config overrides A again
+    writeFileSync(
+      localConfig,
+      JSON.stringify({
+        "context-color-levels": [80, 60, 40],
+      })
+    );
+
+    // Set CLAUDE_CONFIG_DIR
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = userConfigDir;
+
+    const config = ConfigLoader.load(projectDir);
+
+    // Restore original env
+    if (originalEnv === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
+
+    expect(config["context-color-levels"]).toEqual([80, 60, 40]); // From local (last)
+    expect(config["compact-buffer"]).toBe(50000); // From user (not overridden)
   });
 });

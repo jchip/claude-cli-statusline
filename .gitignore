@@ -2,3 +2,4 @@
 node_modules
 bun.lock
 *.tgz
+.claude/*.local.json
