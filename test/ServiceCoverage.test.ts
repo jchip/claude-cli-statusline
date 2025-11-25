@@ -51,7 +51,7 @@ describe("ServiceCoverage", () => {
       "test.json"
     );
     expect(overridden["context-color-levels"]).toEqual([70, 50, 25]);
-    expect(overridden["save-sample"].enable).toBe(true);
+    expect(overridden["save-sample"].enabled).toBe(true);
     expect(overridden["save-sample"].filename).toBe("test.json");
   });
 

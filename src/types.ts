@@ -10,7 +10,7 @@ export interface Config {
   "default-context-window": number;
   "compact-buffer": number;
   "save-sample": {
-    enable: boolean;
+    enabled: boolean;
     filename: string;
   };
   "animations"?: {
@@ -27,6 +27,7 @@ export interface Config {
     dirty: string;
     staged: string;
   };
+  "clear-model"?: boolean;
 }
 
 export interface StatusLineInput {

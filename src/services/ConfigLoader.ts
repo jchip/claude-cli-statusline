@@ -2,7 +2,8 @@
  * Configuration loader
  */
 
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { readFile, writeFile } from "fs/promises";
 import { join, isAbsolute } from "path";
 import type { Config } from "../types.ts";
 
@@ -26,7 +27,7 @@ export class ConfigLoader {
         "default-context-window": 200000,
         "compact-buffer": 45000,
         "save-sample": {
-          enable: false,
+          enabled: false,
           filename: ".temp/sample-input.json",
         },
         "animations": {
@@ -43,6 +44,7 @@ export class ConfigLoader {
           dirty: "🛠️",
           staged: "📤",
         },
+        "clear-model": true,
       };
     }
   }
@@ -146,6 +148,7 @@ export class ConfigLoader {
     saveSampleFilename: string | null;
     layout: string | null;
     spinner: string | null;
+    clearModel: boolean;
   } {
     let configFile = "statusline-config.json";
     let colorLevels: [number, number, number] | null = null;
@@ -153,6 +156,7 @@ export class ConfigLoader {
     let saveSampleFilename: string | null = null;
     let layout: string | null = null;
     let spinner: string | null = null;
+    let clearModel = false;
 
     for (const arg of args) {
       if (arg.startsWith("--config=")) {
@@ -180,10 +184,12 @@ export class ConfigLoader {
         layout = arg.slice("--layout=".length);
       } else if (arg.startsWith("--spinner=")) {
         spinner = arg.slice("--spinner=".length);
+      } else if (arg === "--clear-model") {
+        clearModel = true;
       }
     }
 
-    return { configFile, colorLevels, saveSample, saveSampleFilename, layout, spinner };
+    return { configFile, colorLevels, saveSample, saveSampleFilename, layout, spinner, clearModel };
   }
 
   /**
@@ -195,7 +201,8 @@ export class ConfigLoader {
     saveSample: boolean,
     saveSampleFilename: string | null,
     layout: string | null,
-    spinner: string | null
+    spinner: string | null,
+    clearModel: boolean
   ): Config {
     const result = { ...config };
 
@@ -205,7 +212,7 @@ export class ConfigLoader {
 
     if (saveSample) {
       result["save-sample"] = {
-        enable: true,
+        enabled: true,
         filename: saveSampleFilename || result["save-sample"].filename,
       };
     }
@@ -221,6 +228,43 @@ export class ConfigLoader {
       };
     }
 
+    if (clearModel) {
+      result["clear-model"] = true;
+    }
+
     return result;
+  }
+
+  /**
+   * Clear model field from Claude settings.json
+   * Reads ~/.claude/settings.json (or CLAUDE_CONFIG_DIR), removes model field, and saves
+   */
+  static async clearModelFromSettings(): Promise<void> {
+    const configDir = process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME || "", ".claude");
+    const settingsPath = join(configDir, "settings.json");
+
+    // If settings.json doesn't exist, nothing to clear
+    if (!existsSync(settingsPath)) {
+      return;
+    }
+
+    try {
+      const content = await readFile(settingsPath, "utf-8");
+      const settings = JSON.parse(content);
+
+      // If model field doesn't exist, nothing to do
+      if (!("model" in settings)) {
+        return;
+      }
+
+      // Delete model field
+      delete settings.model;
+
+      // Write back to file
+      await writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
+    } catch (error) {
+      // Silently fail - don't break statusline if we can't clear model
+      console.error(`Failed to clear model from ${settingsPath}:`, error);
+    }
   }
 }

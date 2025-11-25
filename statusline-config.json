@@ -6,6 +6,7 @@
     "claude-sonnet-4-20250514": 200000,
     "claude-opus-4-20250514": 200000,
     "claude-opus-4-1-20250805": 200000,
+    "claude-opus-4-5-20251101": 200000,
     "claude-3-5-sonnet-20241022": 200000,
     "claude-3-5-sonnet-20240620": 200000,
     "claude-3-opus-20240229": 200000,
@@ -18,6 +19,7 @@
     "Sonnet 4": 200000,
     "Opus 4": 200000,
     "Opus 4.1": 200000,
+    "Opus 4.5": 200000,
     "Haiku 4": 200000
   },
   "default-context-window": 200000,
@@ -26,7 +28,7 @@
   },
   "compact-buffer": 45000,
   "save-sample": {
-    "enable": false,
+    "enabled": false,
     "filename": ".temp/sample-input.json"
   },
   "animations": {
@@ -40,5 +42,6 @@
     "clean": "💎",
     "dirty": "🛠️",
     "staged": "📤"
-  }
+  },
+  "clear-model": true
 }

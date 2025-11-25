@@ -159,7 +159,7 @@ describe("StatusLineComponents", () => {
       "model-display-name-map": {},
       "default-context-window": 200000,
       "compact-buffer": 45000,
-      "save-sample": { enable: false, filename: "" },
+      "save-sample": { enabled: false, filename: "" },
       "render-layout": ["project cwd git model context"],
     };
 
@@ -192,7 +192,7 @@ describe("StatusLineComponents", () => {
       "model-display-name-map": {},
       "default-context-window": 200000,
       "compact-buffer": 45000,
-      "save-sample": { enable: false, filename: "" },
+      "save-sample": { enabled: false, filename: "" },
       "render-layout": ["project cwd", "git model context"],
     };
 
@@ -225,7 +225,7 @@ describe("StatusLineComponents", () => {
       "model-display-name-map": {},
       "default-context-window": 200000,
       "compact-buffer": 45000,
-      "save-sample": { enable: false, filename: "" },
+      "save-sample": { enabled: false, filename: "" },
       "render-layout": ["context model", "project cwd git"],
     };
 
@@ -262,7 +262,7 @@ describe("StatusLineComponents", () => {
       "model-display-name-map": {},
       "default-context-window": 200000,
       "compact-buffer": 45000,
-      "save-sample": { enable: false, filename: "" },
+      "save-sample": { enabled: false, filename: "" },
       "render-layout": ["git context"],
     };
 
@@ -298,7 +298,7 @@ describe("StatusLineComponents", () => {
       "model-display-name-map": {},
       "default-context-window": 200000,
       "compact-buffer": 45000,
-      "save-sample": { enable: false, filename: "" },
+      "save-sample": { enabled: false, filename: "" },
     };
 
     const components = new StatusLineComponents(workDir, git, model, context, config);
@@ -330,7 +330,7 @@ describe("StatusLineComponents", () => {
       "model-display-name-map": {},
       "default-context-window": 200000,
       "compact-buffer": 45000,
-      "save-sample": { enable: false, filename: "" },
+      "save-sample": { enabled: false, filename: "" },
       "render-layout": "layout-1-line" as const,
     };
 
@@ -363,7 +363,7 @@ describe("StatusLineComponents", () => {
       "model-display-name-map": {},
       "default-context-window": 200000,
       "compact-buffer": 45000,
-      "save-sample": { enable: false, filename: "" },
+      "save-sample": { enabled: false, filename: "" },
       "render-layout": "layout-2-line" as const,
     };
 

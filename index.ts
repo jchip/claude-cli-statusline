@@ -20,7 +20,7 @@ import { StatusLineComponents } from "./src/components/StatusLineComponents.ts";
 async function main() {
   // Step 1: Parse CLI arguments
   const args = process.argv.slice(2);
-  const { configFile, colorLevels, saveSample, saveSampleFilename, layout, spinner } =
+  const { configFile, colorLevels, saveSample, saveSampleFilename, layout, spinner, clearModel } =
     ConfigLoader.parseArgs(args);
 
   // Step 2: Read input from stdin
@@ -52,8 +52,14 @@ async function main() {
     saveSample,
     saveSampleFilename,
     layout,
-    spinner
+    spinner,
+    clearModel
   );
+
+  // Step 3.5: Clear model from settings.json if enabled
+  if (config["clear-model"]) {
+    await ConfigLoader.clearModelFromSettings();
+  }
 
   // Step 4: Load cache early to get git info
   const transcriptPath = input.transcript_path;
@@ -103,7 +109,7 @@ async function main() {
   process.stdout.write(output);
 
   // Step 9: Save sample if requested
-  if (config["save-sample"].enable) {
+  if (config["save-sample"].enabled) {
     try {
       const samplePath = config["save-sample"].filename;
       const sampleDir = dirname(samplePath);

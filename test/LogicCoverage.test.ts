@@ -101,7 +101,7 @@ describe("LogicCoverage", () => {
       "default-context-window": 200000,
       "context-color-levels": [65, 45, 20],
       "compact-buffer": 45000,
-      "save-sample": { enable: false, filename: "" },
+      "save-sample": { enabled: false, filename: "" },
     };
     const result = ModelMatcher.matchByModelId("test-model", config);
     expect(result).not.toBeNull();
@@ -117,7 +117,7 @@ describe("LogicCoverage", () => {
       "default-context-window": 200000,
       "context-color-levels": [65, 45, 20],
       "compact-buffer": 45000,
-      "save-sample": { enable: false, filename: "" },
+      "save-sample": { enabled: false, filename: "" },
     };
     const result = ModelMatcher.matchByDisplayName("Test Model", config);
     expect(result).not.toBeNull();
@@ -133,7 +133,7 @@ describe("LogicCoverage", () => {
       "default-context-window": 200000,
       "context-color-levels": [65, 45, 20],
       "compact-buffer": 45000,
-      "save-sample": { enable: false, filename: "" },
+      "save-sample": { enabled: false, filename: "" },
     };
     const result = ModelMatcher.getDefault(config);
     expect(result.maxTokens).toBe(200000);

@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { ConfigLoader } from "../src/services/ConfigLoader.ts";
-import { writeFileSync, mkdirSync, rmSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from "fs";
 import { join } from "path";
 
 describe("ConfigLoader", () => {
@@ -129,34 +129,34 @@ describe("ConfigLoader", () => {
 
   test("applies color level overrides", () => {
     const config = ConfigLoader.load(projectDir);
-    const overridden = ConfigLoader.applyOverrides(config, [80, 60, 40], false, null);
+    const overridden = ConfigLoader.applyOverrides(config, [80, 60, 40], false, null, null, null, false);
     expect(overridden["context-color-levels"]).toEqual([80, 60, 40]);
   });
 
   test("applies save sample overrides", () => {
     const config = ConfigLoader.load(projectDir);
-    const overridden = ConfigLoader.applyOverrides(config, null, true, "debug.json");
-    expect(overridden["save-sample"].enable).toBe(true);
+    const overridden = ConfigLoader.applyOverrides(config, null, true, "debug.json", null, null, false);
+    expect(overridden["save-sample"].enabled).toBe(true);
     expect(overridden["save-sample"].filename).toBe("debug.json");
   });
 
   test("preserves config filename when enabling save-sample", () => {
     const config = ConfigLoader.load(projectDir);
     config["save-sample"].filename = "original.json";
-    const overridden = ConfigLoader.applyOverrides(config, null, true, null);
-    expect(overridden["save-sample"].enable).toBe(true);
+    const overridden = ConfigLoader.applyOverrides(config, null, true, null, null, null, false);
+    expect(overridden["save-sample"].enabled).toBe(true);
     expect(overridden["save-sample"].filename).toBe("original.json");
   });
 
-  test("preserves default filename when config only sets enable", () => {
+  test("preserves default filename when config only sets enabled", () => {
     const configPath = join(claudeDir, "statusline-config.json");
     writeFileSync(
       configPath,
-      JSON.stringify({ "save-sample": { enable: true } })
+      JSON.stringify({ "save-sample": { enabled: true } })
     );
 
     const config = ConfigLoader.load(projectDir);
-    expect(config["save-sample"].enable).toBe(true);
+    expect(config["save-sample"].enabled).toBe(true);
     expect(config["save-sample"].filename).toBe(".temp/sample-input.json");
   });
 
@@ -307,5 +307,96 @@ describe("ConfigLoader", () => {
 
     expect(config["context-color-levels"]).toEqual([80, 60, 40]); // From local (last)
     expect(config["compact-buffer"]).toBe(50000); // From user (not overridden)
+  });
+
+  test("parses --clear-model flag", () => {
+    const args = ["--clear-model"];
+    const parsed = ConfigLoader.parseArgs(args);
+    expect(parsed.clearModel).toBe(true);
+  });
+
+  test("applies clearModel override", () => {
+    const config = ConfigLoader.load(projectDir);
+    const overridden = ConfigLoader.applyOverrides(config, null, false, null, null, null, true);
+    expect(overridden["clear-model"]).toBe(true);
+  });
+
+  test("clearModelFromSettings removes model field from settings.json", async () => {
+    const customConfigDir = join(testDir, "custom-claude-clear");
+    mkdirSync(customConfigDir, { recursive: true });
+
+    const settingsPath = join(customConfigDir, "settings.json");
+    writeFileSync(
+      settingsPath,
+      JSON.stringify({
+        model: "claude-sonnet-4",
+        otherSetting: "keep-this",
+      }, null, 2)
+    );
+
+    // Set CLAUDE_CONFIG_DIR
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = customConfigDir;
+
+    await ConfigLoader.clearModelFromSettings();
+
+    // Restore original env
+    if (originalEnv === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
+
+    // Read back and verify
+    const content = readFileSync(settingsPath, "utf-8");
+    const settings = JSON.parse(content);
+    expect(settings.model).toBeUndefined();
+    expect(settings.otherSetting).toBe("keep-this");
+  });
+
+  test("clearModelFromSettings does nothing if settings.json doesn't exist", async () => {
+    const customConfigDir = join(testDir, "no-settings");
+    mkdirSync(customConfigDir, { recursive: true });
+
+    // Set CLAUDE_CONFIG_DIR
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = customConfigDir;
+
+    // Should not throw
+    await expect(ConfigLoader.clearModelFromSettings()).resolves.toBeUndefined();
+
+    // Restore original env
+    if (originalEnv === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
+  });
+
+  test("clearModelFromSettings does nothing if model field doesn't exist", async () => {
+    const customConfigDir = join(testDir, "no-model-field");
+    mkdirSync(customConfigDir, { recursive: true });
+
+    const settingsPath = join(customConfigDir, "settings.json");
+    const originalSettings = { otherSetting: "value" };
+    writeFileSync(settingsPath, JSON.stringify(originalSettings, null, 2));
+
+    // Set CLAUDE_CONFIG_DIR
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = customConfigDir;
+
+    await ConfigLoader.clearModelFromSettings();
+
+    // Restore original env
+    if (originalEnv === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
+
+    // Settings should be unchanged
+    const content = readFileSync(settingsPath, "utf-8");
+    const settings = JSON.parse(content);
+    expect(settings).toEqual(originalSettings);
   });
 });
