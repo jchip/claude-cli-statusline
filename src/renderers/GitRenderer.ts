@@ -62,6 +62,6 @@ export class GitRenderer {
     parts.push(`${ANSI_COLORS.green}${Icons.GIT_BRANCH}${ANSI_COLORS.reset}`);
     parts.push(data.branch!);
 
-    return parts.join(" ");
+    return parts.join("\u00A0");
   }
 }
