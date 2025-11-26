@@ -11,6 +11,6 @@ export class ModelRenderer {
    * Render model info as formatted string
    */
   static render(data: ModelData): string {
-    return `${Icons.MODEL} ${data.mappedDisplayName}`;
+    return `${Icons.MODEL}\u00A0${data.mappedDisplayName}`;
   }
 }

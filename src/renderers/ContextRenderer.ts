@@ -42,7 +42,7 @@ export class ContextRenderer {
 
     // Build output
     parts.push(Icons.CONTEXT);
-    parts.push(" ");
+    parts.push("\u00A0");
     parts.push(color);
     parts.push(`${Math.round(remainingPercent)}%`);
     parts.push(ANSI_COLORS.reset);

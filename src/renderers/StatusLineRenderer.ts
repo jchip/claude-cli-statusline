@@ -31,6 +31,6 @@ export class StatusLineRenderer {
     parts.push(ModelRenderer.render(model));
     parts.push(ContextRenderer.render(context, thresholds));
 
-    return parts.join(" ");
+    return parts.join("\u00A0");
   }
 }

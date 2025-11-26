@@ -18,20 +18,20 @@ export class WorkDirRenderer {
     parts.push(Icons.CURRENT_DIR);
     parts.push(data.relativePath);
 
-    return parts.join(" ");
+    return parts.join("\u00A0");
   }
 
   /**
    * Render only project directory
    */
   static renderProject(data: WorkDirData): string {
-    return `${Icons.WORKDIR} ${data.projectDirDisplay}`;
+    return `${Icons.WORKDIR}\u00A0${data.projectDirDisplay}`;
   }
 
   /**
    * Render only current working directory
    */
   static renderCwd(data: WorkDirData): string {
-    return `${Icons.CURRENT_DIR} ${data.relativePath}`;
+    return `${Icons.CURRENT_DIR}\u00A0${data.relativePath}`;
   }
 }
