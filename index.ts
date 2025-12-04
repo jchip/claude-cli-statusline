@@ -56,9 +56,9 @@ async function main() {
     clearModel
   );
 
-  // Step 3.5: Clear model from settings.json if enabled
-  if (config["clear-model"]) {
-    await ConfigLoader.clearModelFromSettings();
+  // Step 3.5: Clear model from settings.json (unless explicitly disabled)
+  if (config["clear-model"] !== false) {
+    await ConfigLoader.moveModelToProjectSettings(projectDir);
   }
 
   // Step 4: Load cache early to get git info

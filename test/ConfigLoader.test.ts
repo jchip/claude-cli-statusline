@@ -321,8 +321,131 @@ describe("ConfigLoader", () => {
     expect(overridden["clear-model"]).toBe(true);
   });
 
-  test("clearModelFromSettings removes model field from settings.json", async () => {
+  test("moveModelToProjectSettings moves model from user settings to project local", async () => {
     const customConfigDir = join(testDir, "custom-claude-clear");
+    const projectDir = join(testDir, "project-clear-model");
+    mkdirSync(customConfigDir, { recursive: true });
+    mkdirSync(join(projectDir, ".claude"), { recursive: true });
+
+    const settingsPath = join(customConfigDir, "settings.json");
+    writeFileSync(
+      settingsPath,
+      JSON.stringify({
+        model: "claude-sonnet-4",
+        otherSetting: "keep-this",
+      }, null, 2)
+    );
+
+    // Set CLAUDE_CONFIG_DIR
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = customConfigDir;
+
+    await ConfigLoader.moveModelToProjectSettings(projectDir);
+
+    // Restore original env
+    if (originalEnv === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
+
+    // Verify model removed from user settings
+    const content = readFileSync(settingsPath, "utf-8");
+    const settings = JSON.parse(content);
+    expect(settings.model).toBeUndefined();
+    expect(settings.otherSetting).toBe("keep-this");
+
+    // Verify model moved to project local settings
+    const localSettingsPath = join(projectDir, ".claude", "settings.local.json");
+    const localContent = readFileSync(localSettingsPath, "utf-8");
+    const localSettings = JSON.parse(localContent);
+    expect(localSettings.model).toBe("claude-sonnet-4");
+  });
+
+  test("moveModelToProjectSettings does nothing if settings.json doesn't exist", async () => {
+    const customConfigDir = join(testDir, "no-settings");
+    const projectDir = join(testDir, "project-no-settings");
+    mkdirSync(customConfigDir, { recursive: true });
+    mkdirSync(join(projectDir, ".claude"), { recursive: true });
+
+    // Set CLAUDE_CONFIG_DIR
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = customConfigDir;
+
+    // Should not throw
+    await expect(ConfigLoader.moveModelToProjectSettings(projectDir)).resolves.toBeUndefined();
+
+    // Restore original env
+    if (originalEnv === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
+  });
+
+  test("moveModelToProjectSettings does nothing if model field doesn't exist", async () => {
+    const customConfigDir = join(testDir, "no-model-field");
+    const projectDir = join(testDir, "project-no-model-field");
+    mkdirSync(customConfigDir, { recursive: true });
+    mkdirSync(join(projectDir, ".claude"), { recursive: true });
+
+    const settingsPath = join(customConfigDir, "settings.json");
+    const originalSettings = { otherSetting: "value" };
+    writeFileSync(settingsPath, JSON.stringify(originalSettings, null, 2));
+
+    // Set CLAUDE_CONFIG_DIR
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = customConfigDir;
+
+    await ConfigLoader.moveModelToProjectSettings(projectDir);
+
+    // Restore original env
+    if (originalEnv === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
+
+    // Settings should be unchanged
+    const content = readFileSync(settingsPath, "utf-8");
+    const settings = JSON.parse(content);
+    expect(settings).toEqual(originalSettings);
+  });
+
+  test("moveModelToProjectSettings does nothing if user settings not modified within 5 seconds", async () => {
+    const customConfigDir = join(testDir, "old-settings");
+    mkdirSync(customConfigDir, { recursive: true });
+
+    const settingsPath = join(customConfigDir, "settings.json");
+    const originalSettings = { model: "claude-sonnet-4", otherSetting: "value" };
+    writeFileSync(settingsPath, JSON.stringify(originalSettings, null, 2));
+
+    // Touch the file to set mtime to 10 seconds ago
+    const tenSecondsAgo = new Date(Date.now() - 10000);
+    const { utimesSync } = await import("fs");
+    utimesSync(settingsPath, tenSecondsAgo, tenSecondsAgo);
+
+    // Set CLAUDE_CONFIG_DIR
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = customConfigDir;
+
+    await ConfigLoader.moveModelToProjectSettings(projectDir);
+
+    // Restore original env
+    if (originalEnv === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
+
+    // Settings should be unchanged since it wasn't modified within 5 seconds
+    const content = readFileSync(settingsPath, "utf-8");
+    const settings = JSON.parse(content);
+    expect(settings).toEqual(originalSettings);
+  });
+
+  test("moveModelToProjectSettings moves model to project local when user settings has model and was recently modified", async () => {
+    const customConfigDir = join(testDir, "recent-with-model");
     mkdirSync(customConfigDir, { recursive: true });
 
     const settingsPath = join(customConfigDir, "settings.json");
@@ -338,7 +461,7 @@ describe("ConfigLoader", () => {
     const originalEnv = process.env.CLAUDE_CONFIG_DIR;
     process.env.CLAUDE_CONFIG_DIR = customConfigDir;
 
-    await ConfigLoader.clearModelFromSettings();
+    await ConfigLoader.moveModelToProjectSettings(projectDir);
 
     // Restore original env
     if (originalEnv === undefined) {
@@ -347,23 +470,46 @@ describe("ConfigLoader", () => {
       process.env.CLAUDE_CONFIG_DIR = originalEnv;
     }
 
-    // Read back and verify
-    const content = readFileSync(settingsPath, "utf-8");
-    const settings = JSON.parse(content);
-    expect(settings.model).toBeUndefined();
-    expect(settings.otherSetting).toBe("keep-this");
+    // User settings should have model removed
+    const userContent = readFileSync(settingsPath, "utf-8");
+    const userSettings = JSON.parse(userContent);
+    expect(userSettings.model).toBeUndefined();
+    expect(userSettings.otherSetting).toBe("keep-this");
+
+    // Project local should have the model
+    const localSettingsPath = join(claudeDir, "settings.local.json");
+    const localContent = readFileSync(localSettingsPath, "utf-8");
+    const localSettings = JSON.parse(localContent);
+    expect(localSettings.model).toBe("claude-sonnet-4");
   });
 
-  test("clearModelFromSettings does nothing if settings.json doesn't exist", async () => {
-    const customConfigDir = join(testDir, "no-settings");
+  test("moveModelToProjectSettings removes model from project local when user picked default", async () => {
+    const customConfigDir = join(testDir, "user-picked-default");
     mkdirSync(customConfigDir, { recursive: true });
+
+    // Create user settings without model (user picked default)
+    const userSettingsPath = join(customConfigDir, "settings.json");
+    writeFileSync(userSettingsPath, JSON.stringify({ otherSetting: "value" }, null, 2));
+
+    // Create project local settings with model (from before user picked default)
+    const localSettingsPath = join(claudeDir, "settings.local.json");
+    writeFileSync(
+      localSettingsPath,
+      JSON.stringify({ model: "claude-sonnet-4", projectSetting: "keep" }, null, 2)
+    );
+
+    // Set project local mtime to 1 second before user settings
+    const { utimesSync } = await import("fs");
+    const now = new Date();
+    const oneSecondAgo = new Date(now.getTime() - 1000);
+    utimesSync(localSettingsPath, oneSecondAgo, oneSecondAgo);
+    utimesSync(userSettingsPath, now, now);
 
     // Set CLAUDE_CONFIG_DIR
     const originalEnv = process.env.CLAUDE_CONFIG_DIR;
     process.env.CLAUDE_CONFIG_DIR = customConfigDir;
 
-    // Should not throw
-    await expect(ConfigLoader.clearModelFromSettings()).resolves.toBeUndefined();
+    await ConfigLoader.moveModelToProjectSettings(projectDir);
 
     // Restore original env
     if (originalEnv === undefined) {
@@ -371,21 +517,41 @@ describe("ConfigLoader", () => {
     } else {
       process.env.CLAUDE_CONFIG_DIR = originalEnv;
     }
+
+    // Project local should have model removed
+    const localContent = readFileSync(localSettingsPath, "utf-8");
+    const localSettings = JSON.parse(localContent);
+    expect(localSettings.model).toBeUndefined();
+    expect(localSettings.projectSetting).toBe("keep");
   });
 
-  test("clearModelFromSettings does nothing if model field doesn't exist", async () => {
-    const customConfigDir = join(testDir, "no-model-field");
+  test("moveModelToProjectSettings does not remove model from project local if modified after user settings", async () => {
+    const customConfigDir = join(testDir, "project-newer");
     mkdirSync(customConfigDir, { recursive: true });
 
-    const settingsPath = join(customConfigDir, "settings.json");
-    const originalSettings = { otherSetting: "value" };
-    writeFileSync(settingsPath, JSON.stringify(originalSettings, null, 2));
+    // Create user settings without model
+    const userSettingsPath = join(customConfigDir, "settings.json");
+    writeFileSync(userSettingsPath, JSON.stringify({ otherSetting: "value" }, null, 2));
+
+    // Create project local settings with model
+    const localSettingsPath = join(claudeDir, "settings.local.json");
+    writeFileSync(
+      localSettingsPath,
+      JSON.stringify({ model: "claude-sonnet-4", projectSetting: "keep" }, null, 2)
+    );
+
+    // Set user settings mtime to 2 seconds before project local (project local is newer)
+    const { utimesSync } = await import("fs");
+    const now = new Date();
+    const twoSecondsAgo = new Date(now.getTime() - 2000);
+    utimesSync(userSettingsPath, twoSecondsAgo, twoSecondsAgo);
+    utimesSync(localSettingsPath, now, now);
 
     // Set CLAUDE_CONFIG_DIR
     const originalEnv = process.env.CLAUDE_CONFIG_DIR;
     process.env.CLAUDE_CONFIG_DIR = customConfigDir;
 
-    await ConfigLoader.clearModelFromSettings();
+    await ConfigLoader.moveModelToProjectSettings(projectDir);
 
     // Restore original env
     if (originalEnv === undefined) {
@@ -394,9 +560,10 @@ describe("ConfigLoader", () => {
       process.env.CLAUDE_CONFIG_DIR = originalEnv;
     }
 
-    // Settings should be unchanged
-    const content = readFileSync(settingsPath, "utf-8");
-    const settings = JSON.parse(content);
-    expect(settings).toEqual(originalSettings);
+    // Project local should still have model (not removed because it was modified after user settings)
+    const localContent = readFileSync(localSettingsPath, "utf-8");
+    const localSettings = JSON.parse(localContent);
+    expect(localSettings.model).toBe("claude-sonnet-4");
+    expect(localSettings.projectSetting).toBe("keep");
   });
 });

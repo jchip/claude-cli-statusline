@@ -64,7 +64,7 @@ describe("ContextCalculator", () => {
     const cyan = "\x1b[36m";
     const reset = "\x1b[0m";
     expect(ContextCalculator.formatMaxTokens(200000)).toBe(`200${cyan}K${reset}`);
-    expect(ContextCalculator.formatMaxTokens(1000000)).toBe(`1${cyan}M${reset}`);
+    expect(ContextCalculator.formatMaxTokens(1000000)).toBe(`1${cyan}M${reset}🚀`);
     expect(ContextCalculator.formatMaxTokens(500)).toBe("500");
   });
 });

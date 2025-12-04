@@ -47,9 +47,9 @@ describe("formatTokenCount", () => {
     expect(formatTokenCount(200000)).toBe(`200${cyan}K${reset}`);
   });
 
-  test("formats millions with M in cyan", () => {
-    expect(formatTokenCount(1000000)).toBe(`1${cyan}M${reset}`);
-    expect(formatTokenCount(1500000)).toBe(`1.5${cyan}M${reset}`);
+  test("formats millions with M in cyan and rocket", () => {
+    expect(formatTokenCount(1000000)).toBe(`1${cyan}M${reset}🚀`);
+    expect(formatTokenCount(1500000)).toBe(`1.5${cyan}M${reset}🚀`);
   });
 
   test("returns raw number for small values", () => {

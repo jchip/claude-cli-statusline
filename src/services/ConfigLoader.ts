@@ -3,7 +3,7 @@
  */
 
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import { readFile, writeFile } from "fs/promises";
+import { readFile, writeFile, stat } from "fs/promises";
 import { join, isAbsolute } from "path";
 import type { Config } from "../types.ts";
 
@@ -236,35 +236,73 @@ export class ConfigLoader {
   }
 
   /**
-   * Clear model field from Claude settings.json
-   * Reads ~/.claude/settings.json (or CLAUDE_CONFIG_DIR), removes model field, and saves
+   * Move model from user settings to project local settings
+   * Removes model from user settings (CLAUDE_CONFIG_DIR or ~/.claude) and adds it to project local settings
+   *
+   * If user settings was recently modified (within 5 seconds) and has no model,
+   * this indicates the user picked default, so remove model from project local settings too
+   * (if project local was modified before user settings and has a model field).
    */
-  static async clearModelFromSettings(): Promise<void> {
-    const configDir = process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME || "", ".claude");
-    const settingsPath = join(configDir, "settings.json");
+  static async moveModelToProjectSettings(projectDir?: string): Promise<void> {
+    if (!projectDir) return;
 
-    // If settings.json doesn't exist, nothing to clear
-    if (!existsSync(settingsPath)) {
-      return;
-    }
+    const configDir = process.env.CLAUDE_CONFIG_DIR || join(process.env.HOME || "", ".claude");
+
+    const data: {
+      userSettingsFile: string;
+      userSettingsStat?: Awaited<ReturnType<typeof stat>>;
+      userSettings?: Record<string, unknown>;
+      localSettingsFile?: string;
+      localSettings?: Record<string, unknown>;
+      localSettingsStat?: Awaited<ReturnType<typeof stat>>;
+      newLocalSettings?: Record<string, unknown>;
+    } = {
+      userSettingsFile: join(configDir, "settings.json"),
+    };
 
     try {
-      const content = await readFile(settingsPath, "utf-8");
-      const settings = JSON.parse(content);
+      data.userSettingsStat = await stat(data.userSettingsFile);
+    } catch {
+      return; // User settings file doesn't exist
+    }
 
-      // If model field doesn't exist, nothing to do
-      if (!("model" in settings)) {
-        return;
+    const modifiedWithin5Seconds = (Date.now() - data.userSettingsStat.mtimeMs) < 5000;
+    if (!modifiedWithin5Seconds) return;
+
+    try {
+      data.userSettings = JSON.parse(await readFile(data.userSettingsFile, "utf-8"));
+    } catch {
+      return; // Failed to read/parse user settings
+    }
+
+    data.localSettingsFile = join(projectDir, ".claude", "settings.local.json");
+
+    try {
+      data.localSettings = JSON.parse(await readFile(data.localSettingsFile, "utf-8"));
+    } catch {
+      data.localSettings = {};
+    }
+
+    if (data.userSettings.model) {
+      // Move model from user to local settings
+      data.newLocalSettings = { ...data.localSettings, model: data.userSettings.model };
+      delete data.userSettings.model;
+      await writeFile(data.userSettingsFile, JSON.stringify(data.userSettings, null, 2) + "\n", "utf-8");
+    } else if (data.localSettings.model) {
+      // User picked default - check if we should clear local model
+      try {
+        data.localSettingsStat = await stat(data.localSettingsFile);
+        if (data.localSettingsStat.mtimeMs < data.userSettingsStat.mtimeMs) {
+          delete data.localSettings.model;
+          data.newLocalSettings = data.localSettings;
+        }
+      } catch {
+        // Local settings file doesn't exist, nothing to clear
       }
+    }
 
-      // Delete model field
-      delete settings.model;
-
-      // Write back to file
-      await writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
-    } catch (error) {
-      // Silently fail - don't break statusline if we can't clear model
-      console.error(`Failed to clear model from ${settingsPath}:`, error);
+    if (data.newLocalSettings) {
+      await writeFile(data.localSettingsFile, JSON.stringify(data.newLocalSettings, null, 2) + "\n", "utf-8");
     }
   }
 }
