@@ -38,7 +38,7 @@
   },
   "show-git-repo-name": false,
   "show-project-full-dir": false,
-  "render-layout": "full",
+  "render-layout": "extend",
   "git-status-icons": {
     "clean": "💎",
     "dirty": "🛠️",
