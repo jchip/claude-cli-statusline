@@ -9,6 +9,7 @@ import type { ContextInfo } from "./ContextInfo.ts";
 import type { CostInfo } from "./CostInfo.ts";
 import type { LinesChanged } from "./LinesChanged.ts";
 import type { SessionDuration } from "./SessionDuration.ts";
+import type { SubagentInfo } from "./SubagentInfo.ts";
 import type { Config } from "../types.ts";
 import { PREDEFINED_LAYOUTS } from "../types.ts";
 
@@ -21,7 +22,8 @@ export class StatusLineComponents {
     public readonly config?: Config,
     public readonly cost?: CostInfo,
     public readonly lines?: LinesChanged,
-    public readonly duration?: SessionDuration
+    public readonly duration?: SessionDuration,
+    public readonly subagent?: SubagentInfo
   ) {}
 
   render(): string {
@@ -40,6 +42,7 @@ export class StatusLineComponents {
       cost: this.cost?.render() ?? "",
       lines: this.lines?.render() ?? "",
       duration: this.duration?.render() ?? "",
+      subagent: this.subagent?.render() ?? "",
     };
 
     // Resolve layout (predefined or custom)

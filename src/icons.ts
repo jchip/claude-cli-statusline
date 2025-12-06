@@ -24,4 +24,5 @@ export class Icons {
   static readonly COST = "💵";
   static readonly LINES = "📝";
   static readonly DURATION = "⏱️";
+  static readonly SUBAGENT = "🔍";
 }

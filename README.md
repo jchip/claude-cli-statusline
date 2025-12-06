@@ -61,18 +61,23 @@ Or with a custom config file:
 
 **Default (`"extend"` layout - single line):**
 ```
+📦 project-name 📁 relative/dir 🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K 🔍 Explore 💵 $0.05 ⏱️ 1h23m
+```
+
+**Without sub-agent active:**
+```
 📦 project-name 📁 relative/dir 🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K 💵 $0.05 ⏱️ 1h23m
 ```
 
 **With `"render-layout": "normal"` (basic info only):**
 ```
-📦 project-name 📁 relative/dir 🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
+📦 project-name 📁 relative/dir 🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K 🔍 Explore
 ```
 
 **With `"render-layout": "layout-2-line"` (two lines):**
 ```
 📦 project-name 📁 relative/dir
-🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
+🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K 🔍 Explore
 ```
 
 **Icons:**
@@ -288,12 +293,13 @@ The statusline displays information through widgets that can be arranged using l
 | `git` | 🐙 | Git repository status (clean/dirty/staged) and branch name |
 | `model` | 🧠 | AI model name (e.g., "Sonnet 4.5") |
 | `context` | ⏬ | Context usage (remaining % before full/compact, max tokens) |
+| `subagent` | 🔍 | Currently active sub-agent (e.g., "Code-Reviewer", "Explore") |
 | `cost` | 💵 | Total session cost in USD (cumulative across context resets) |
 | `lines` | 📝 | Lines added/removed during session (vanity metric, doesn't reset with context) |
 | `duration` | ⏱️ | Total session duration in hours/minutes (cumulative across context resets) |
 
 **Note on metrics:**
-- **Actionable**: `git` status tells you if you need to commit changes
+- **Actionable**: `git` status tells you if you need to commit changes, `subagent` shows which specialist is handling the task
 - **Informational**: `context` shows when compaction will occur
 - **Vanity metrics**: `cost`, `lines`, and `duration` are cumulative session stats that don't reset with `/clear`
 
@@ -522,15 +528,15 @@ Controls the layout and ordering of statusline components. You can use predefine
 **Default:** `"extend"` (single line with cost and duration)
 
 **Predefined Layouts:**
-- `"normal"` - Basic info only: `["project cwd git model context"]`
-- `"extend"` - Adds cost & duration: `["project cwd git model context cost duration"]` (default)
-- `"full"` - Everything including lines: `["project cwd git model context cost lines duration"]`
+- `"normal"` - Basic info only: `["project cwd git model context subagent"]`
+- `"extend"` - Adds cost & duration: `["project cwd git model context subagent cost duration"]` (default)
+- `"full"` - Everything including lines: `["project cwd git model context subagent cost lines duration"]`
 - `"layout-1-line"` - Legacy alias for `normal`
-- `"layout-2-line"` - Two lines: `["project cwd", "git model context"]`
+- `"layout-2-line"` - Two lines: `["project cwd", "git model context subagent"]`
 
 **Available widgets for custom layouts:**
 
-You can use any combination of: `project`, `cwd`, `git`, `model`, `context`, `cost`, `lines`, `duration`
+You can use any combination of: `project`, `cwd`, `git`, `model`, `context`, `subagent`, `cost`, `lines`, `duration`
 
 See the [Available Widgets](#available-widgets) section for details on what each widget displays.
 

@@ -19,6 +19,7 @@ import { ContextInfo } from "./src/components/ContextInfo.ts";
 import { CostInfo } from "./src/components/CostInfo.ts";
 import { LinesChanged } from "./src/components/LinesChanged.ts";
 import { SessionDuration } from "./src/components/SessionDuration.ts";
+import { SubagentInfo } from "./src/components/SubagentInfo.ts";
 import { StatusLineComponents } from "./src/components/StatusLineComponents.ts";
 
 async function main() {
@@ -123,9 +124,10 @@ async function main() {
   const cost = CostInfo.fromInput(input);
   const lines = LinesChanged.fromInput(input);
   const duration = SessionDuration.fromInput(input);
+  const subagent = SubagentInfo.fromInput(input);
 
   // Step 7: Build and render status line
-  const components = new StatusLineComponents(workDir, git, model, context, config, cost, lines, duration);
+  const components = new StatusLineComponents(workDir, git, model, context, config, cost, lines, duration, subagent);
   const output = components.render();
 
   // Step 8: Output to stdout
