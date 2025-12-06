@@ -32,12 +32,19 @@ async function main() {
   }
 
   let input: StatusLineInput = {};
+  let parseError: string | null = null;
   if (inputText.trim()) {
     try {
       input = JSON.parse(inputText);
     } catch (error) {
-      console.error("Failed to parse input JSON:", error);
+      parseError = error instanceof Error ? error.message : "invalid JSON";
     }
+  }
+
+  // If parse error, output fallback statusline and exit
+  if (parseError) {
+    process.stdout.write(`⚠️ statusline: ${parseError}`);
+    return;
   }
 
   // Step 3: Load configuration
@@ -138,6 +145,7 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error("Fatal error:", error);
+  const msg = error instanceof Error ? error.message : String(error);
+  process.stdout.write(`⚠️ statusline error: ${msg}`);
   process.exit(1);
 });
