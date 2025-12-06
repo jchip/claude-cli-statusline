@@ -213,4 +213,55 @@ describe("ContextInfo", () => {
     expect(output).not.toContain("🏷️");
     expect(output).not.toContain("⚙️");
   });
+
+  test("shows warning icon when exceeds_200k_tokens is true", () => {
+    const context = ContextInfo.fromData(
+      50000,
+      200000,
+      45000,
+      false,
+      [65, 45, 20],
+      "",
+      null,
+      true // exceeds200k
+    );
+    const output = context.render();
+    expect(output).toContain("⚠️");
+    expect(output).not.toContain("⚡️");
+    expect(output).not.toContain("💫");
+  });
+
+  test("shows normal lightning icon when exceeds_200k_tokens is false", () => {
+    const context = ContextInfo.fromData(
+      50000,
+      200000,
+      45000,
+      false,
+      [65, 45, 20],
+      "",
+      null,
+      false // exceeds200k
+    );
+    const output = context.render();
+    expect(output).toContain("⚡️");
+    expect(output).not.toContain("⚠️");
+    expect(output).not.toContain("💫");
+  });
+
+  test("shows warning icon even when compacted if exceeds_200k_tokens is true", () => {
+    const context = ContextInfo.fromData(
+      50000,
+      200000,
+      45000,
+      true, // compacted
+      [65, 45, 20],
+      "",
+      null,
+      true // exceeds200k - takes precedence
+    );
+    const output = context.render();
+    expect(output).toContain("⚠️");
+    expect(output).not.toContain("⚡️");
+    expect(output).not.toContain("💫");
+  });
 });

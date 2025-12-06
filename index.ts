@@ -110,6 +110,7 @@ async function main() {
   const autoCompactEnabled = ClaudeConfigReader.readAutoCompactEnabled();
 
   // Step 6: Create context with analyzed data
+  const exceeds200k = input.exceeds_200k_tokens ?? false;
   const context = ContextInfo.fromData(
     usedTokens,
     model.maxTokens,
@@ -117,7 +118,8 @@ async function main() {
     compactOccurred,
     config["context-color-levels"],
     model.matchIndicator,
-    autoCompactEnabled
+    autoCompactEnabled,
+    exceeds200k
   );
 
   // Step 6.5: Create cost-related components

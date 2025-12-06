@@ -18,7 +18,8 @@ export class ContextInfo {
     public readonly compactOccurred: boolean,
     public readonly thresholds: ColorThresholds,
     public readonly matchIndicator: string = "",
-    public readonly autoCompactEnabled: boolean | null = null
+    public readonly autoCompactEnabled: boolean | null = null,
+    public readonly exceeds200k: boolean = false
   ) {
     // Create data model
     this.data = new ContextData(
@@ -27,7 +28,8 @@ export class ContextInfo {
       compactBuffer,
       compactOccurred,
       matchIndicator,
-      autoCompactEnabled
+      autoCompactEnabled,
+      exceeds200k
     );
   }
 
@@ -96,7 +98,8 @@ export class ContextInfo {
     compactOccurred: boolean,
     colorLevels: [number, number, number],
     matchIndicator = "",
-    autoCompactEnabled: boolean | null = null
+    autoCompactEnabled: boolean | null = null,
+    exceeds200k: boolean = false
   ): ContextInfo {
     const thresholds: ColorThresholds = {
       green: colorLevels[0],
@@ -111,7 +114,8 @@ export class ContextInfo {
       compactOccurred,
       thresholds,
       matchIndicator,
-      autoCompactEnabled
+      autoCompactEnabled,
+      exceeds200k
     );
   }
 }

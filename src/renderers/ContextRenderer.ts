@@ -37,7 +37,10 @@ export class ContextRenderer {
     );
     const color = ContextCalculator.selectColor(remainingPercent, thresholds);
     const bufferColor = ContextCalculator.selectColor(remainingAfterBuffer, thresholds);
-    const compactIcon = ContextCalculator.selectCompactIcon(data.compactOccurred);
+    // Check exceeds_200k_tokens first, then use normal compact icon logic
+    const compactIcon = data.exceeds200k
+      ? "⚠️"
+      : ContextCalculator.selectCompactIcon(data.compactOccurred);
     const maxTokensDisplay = ContextCalculator.formatMaxTokens(data.maxTokens);
 
     // Build output

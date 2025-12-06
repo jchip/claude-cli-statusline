@@ -10,6 +10,7 @@ export class ContextData {
     public readonly compactBuffer: number,
     public readonly compactOccurred: boolean,
     public readonly matchIndicator: string = "",
-    public readonly autoCompactEnabled: boolean | null = null
+    public readonly autoCompactEnabled: boolean | null = null,
+    public readonly exceeds200k: boolean = false
   ) {}
 }

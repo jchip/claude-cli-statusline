@@ -53,6 +53,7 @@ export interface StatusLineInput {
     total_lines_removed?: number;
   };
   subagent_type?: string;
+  exceeds_200k_tokens?: boolean;
   [key: string]: unknown;
 }
 
@@ -105,6 +106,7 @@ export interface ContextData {
   remainingAfterBuffer: number;
   compactOccurred: boolean;
   modelMatchType: "id" | "displayName" | "default";
+  exceeds200k: boolean;
 }
 
 export interface ColorThresholds {
