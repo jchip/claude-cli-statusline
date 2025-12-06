@@ -26,6 +26,7 @@ export class ConfigLoader {
         "model-display-name-map": {},
         "default-context-window": 200000,
         "compact-buffer": 45000,
+        "compact-drop-threshold": 0.7,
         "save-sample": {
           enabled: false,
           filename: ".temp/sample-input.json",

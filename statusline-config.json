@@ -27,6 +27,7 @@
     "Sonnet 4.5 (1M context)": "Sonnet 4.5"
   },
   "compact-buffer": 45000,
+  "compact-drop-threshold": 0.7,
   "save-sample": {
     "enabled": false,
     "filename": ".temp/sample-input.json"

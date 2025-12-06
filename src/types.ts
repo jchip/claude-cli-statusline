@@ -9,6 +9,7 @@ export interface Config {
   "model-display-name-map": Record<string, string>;
   "default-context-window": number;
   "compact-buffer": number;
+  "compact-drop-threshold"?: number;
   "save-sample": {
     enabled: boolean;
     filename: string;

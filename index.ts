@@ -77,7 +77,10 @@ async function main() {
   let compactOccurred = false;
 
   if (transcriptPath && existsSync(transcriptPath)) {
-    const analysis = SessionAnalyzer.analyzeTranscript(transcriptPath);
+    const analysis = SessionAnalyzer.analyzeTranscript(
+      transcriptPath,
+      config["compact-drop-threshold"]
+    );
     analysisCache = analysis.cache;
     cachedGitRepoName = analysis.cache.gitRepoName;
     cachedGitBranch = analysis.cache.gitBranch;

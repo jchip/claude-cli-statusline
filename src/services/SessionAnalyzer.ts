@@ -19,8 +19,10 @@ export interface SessionAnalysisResult {
 export class SessionAnalyzer {
   /**
    * Analyze transcript file with caching
+   * @param transcriptPath Path to transcript file
+   * @param compactDropThreshold Threshold for detecting implicit compaction (default 0.7 = 30% drop)
    */
-  static analyzeTranscript(transcriptPath: string): SessionAnalysisResult {
+  static analyzeTranscript(transcriptPath: string, compactDropThreshold = 0.7): SessionAnalysisResult {
     // Load or create cache
     let cache = CacheManager.read(transcriptPath);
 
@@ -78,8 +80,8 @@ export class SessionAnalyzer {
 
       const tokens = this.calculateTokens(usage);
 
-      // Check for >30% drop (compact without boundary)
-      if (currentTokens > 0 && tokens < currentTokens * 0.7) {
+      // Check for significant drop (compact without boundary)
+      if (currentTokens > 0 && tokens < currentTokens * compactDropThreshold) {
         cache.entries.push({
           line: i + 1,
           tokens: tokens,
