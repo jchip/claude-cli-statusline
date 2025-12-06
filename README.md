@@ -81,11 +81,12 @@ Or with a custom config file:
   - With `show-project-full-dir: true` in config: shows full path like `~/path/to/project`
 - 📁 Current relative directory
 - 🐙 Git repo (octopus icon only by default)
-  - ✓ Clean working tree (🟢 green) - no uncommitted changes
-  - ✗ Dirty working tree (🟡 yellow) - has uncommitted changes
+  - 💎 Clean working tree (🟢 green) - no uncommitted changes
+  - 🛠️ Dirty working tree (🟡 yellow) - has uncommitted changes
+  - 📤 Staged changes (🔵 light blue) - changes ready to commit
   - With `show-git-repo-name: true` in config:
-    - `🐙 ✓ 📦` when repo name matches directory name
-    - `🐙 ✓ repo-name` when repo name differs from directory name
+    - `🐙 💎 📦` when repo name matches directory name
+    - `🐙 💎 repo-name` when repo name differs from directory name
   - Git repo name is extracted from remote URL (e.g., `git@github.com:user/my-repo.git` → `my-repo`)
 - ⎇ Git branch (🟢 green if in repo, 🟡 yellow if no repo)
   - ∅ No git repository
