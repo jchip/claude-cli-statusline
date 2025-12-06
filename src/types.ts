@@ -122,6 +122,10 @@ export const ANSI_COLORS = {
 } as const;
 
 export const PREDEFINED_LAYOUTS = {
+  // Named layouts
+  "normal": ["project cwd git model context"],
+  "full": ["project cwd git model context cost lines duration"],
+  // Legacy names (backward compatibility)
   "layout-1-line": ["project cwd git model context"],
   "layout-2-line": ["project cwd", "git model context"],
 } as const;
