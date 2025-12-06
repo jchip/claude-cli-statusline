@@ -7,10 +7,8 @@ import type {
   SessionAnalysisCache,
   TranscriptEntry,
   TokenUsage,
-  StatusLineInput,
 } from "../types.ts";
 import { CacheManager } from "./CacheManager.ts";
-import { findPercentInObject } from "../utils.ts";
 
 export interface SessionAnalysisResult {
   usedTokens: number;
@@ -19,28 +17,6 @@ export interface SessionAnalysisResult {
 }
 
 export class SessionAnalyzer {
-  /**
-   * Analyze session from transcript or input object
-   */
-  static analyze(
-    input: StatusLineInput,
-    transcriptPath?: string
-  ): SessionAnalysisResult | null {
-    // Try to get from input object first
-    const percent = this.findPercentInInput(input);
-    if (percent !== null) {
-      // We have percent but no token counts, return minimal result
-      return null; // Let it fall through to transcript parsing
-    }
-
-    // Parse transcript if available
-    if (transcriptPath && existsSync(transcriptPath)) {
-      return this.analyzeTranscript(transcriptPath);
-    }
-
-    return null;
-  }
-
   /**
    * Analyze transcript file with caching
    */
@@ -144,25 +120,5 @@ export class SessionAnalyzer {
       (usage.cache_creation_input_tokens || 0) +
       (usage.cache_read_input_tokens || 0)
     );
-  }
-
-  /**
-   * Try to find percentage in input object
-   */
-  private static findPercentInInput(input: StatusLineInput): number | null {
-    // Check budget
-    if (input.budget) {
-      const pct = findPercentInObject(input.budget, "percent");
-      if (pct !== null) return pct;
-    }
-
-    // Check cost
-    if (input.cost) {
-      const pct = findPercentInObject(input.cost, "percent");
-      if (pct !== null) return pct;
-    }
-
-    // Search entire input
-    return findPercentInObject(input, "percent");
   }
 }
