@@ -16,6 +16,9 @@ export interface GitStatusResult {
   gitDir: string | null;
 }
 
+// Memoization cache - stores result per directory for current process run
+const gitStatusCache = new Map<string, GitStatusResult>();
+
 export class GitService {
   /**
    * Find .git directory by traversing up from the given directory
@@ -88,18 +91,27 @@ export class GitService {
   /**
    * Get all git status info in a SINGLE git call
    * Uses git status --porcelain=v2 --branch for combined output
+   * Memoized per directory for current process run
    */
   static getGitStatus(dir: string): GitStatusResult {
+    // Return cached result if available
+    const cached = gitStatusCache.get(dir);
+    if (cached) {
+      return cached;
+    }
+
     const gitDir = this.findGitDir(dir);
 
     if (!gitDir) {
-      return {
+      const result: GitStatusResult = {
         branch: null,
         isClean: true,
         hasStaged: false,
         repoName: null,
         gitDir: null,
       };
+      gitStatusCache.set(dir, result);
+      return result;
     }
 
     // Get repo name from config (no git command needed)
@@ -113,13 +125,15 @@ export class GitService {
       );
 
       if (result.exitCode !== 0) {
-        return {
+        const statusResult: GitStatusResult = {
           branch: null,
           isClean: true,
           hasStaged: false,
           repoName,
           gitDir,
         };
+        gitStatusCache.set(dir, statusResult);
+        return statusResult;
       }
 
       const output = result.stdout.toString();
@@ -174,15 +188,19 @@ export class GitService {
         }
       }
 
-      return { branch, isClean, hasStaged, repoName, gitDir };
+      const statusResult: GitStatusResult = { branch, isClean, hasStaged, repoName, gitDir };
+      gitStatusCache.set(dir, statusResult);
+      return statusResult;
     } catch {
-      return {
+      const statusResult: GitStatusResult = {
         branch: null,
         isClean: true,
         hasStaged: false,
         repoName,
         gitDir,
       };
+      gitStatusCache.set(dir, statusResult);
+      return statusResult;
     }
   }
 
