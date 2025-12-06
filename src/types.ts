@@ -43,9 +43,10 @@ export interface StatusLineInput {
     current_dir?: string;
     project_dir?: string;
   };
-  budget?: any;
-  cost?: any;
-  [key: string]: any;
+  gitBranch?: string;
+  budget?: Record<string, unknown>;
+  cost?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 export interface SessionCacheEntry {
@@ -87,7 +88,7 @@ export interface TranscriptEntry {
     postTokens?: number;
   };
   gitBranch?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ContextData {
