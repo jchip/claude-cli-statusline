@@ -59,15 +59,20 @@ Or with a custom config file:
 
 ## What it shows
 
-**Default (single line):**
+**Default (`"extend"` layout - single line):**
 ```
-📦 project-name 📁 relative/dir 🐙 ✓ ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
+📦 project-name 📁 relative/dir 🐙 💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K 💵 $0.05 ⏱️ 1h23m
+```
+
+**With `"render-layout": "normal"` (basic info only):**
+```
+📦 project-name 📁 relative/dir 🐙 💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
 ```
 
 **With `"render-layout": "layout-2-line"` (two lines):**
 ```
 📦 project-name 📁 relative/dir
-🐙 ✓ ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
+🐙 💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K
 ```
 
 **Icons:**
@@ -232,7 +237,10 @@ Or with custom filename:
 Specify the statusline layout. Can be a predefined layout name or a custom layout name you've defined.
 
 **Predefined layouts:**
-- `layout-1-line` - Single line with all components (default)
+- `normal` - Basic info only
+- `extend` - Adds cost & duration (default)
+- `full` - Everything including lines
+- `layout-1-line` - Legacy alias for `normal`
 - `layout-2-line` - Two lines
 
 **Example:**
@@ -241,7 +249,7 @@ Specify the statusline layout. Can be a predefined layout name or a custom layou
 {
   "statusLine": {
     "type": "command",
-    "command": "bun ~/claude-cli-statusline/index.ts --layout=layout-1-line"
+    "command": "bun ~/claude-cli-statusline/index.ts --layout=extend"
   }
 }
 ```
@@ -267,6 +275,26 @@ Specify the animated spinner style. Choose from 16 different styles.
 ```
 
 **Note:** This CLI flag overrides the `animations.spinner` setting in the config file. Animations must be enabled separately with `animations.enabled: true` in your config.
+
+## Available Widgets
+
+The statusline displays information through widgets that can be arranged using layouts. Each widget shows a specific metric:
+
+| Widget | Icon | Description |
+|--------|------|-------------|
+| `project` | 📦 | Project directory name (workspace root) |
+| `cwd` | 📁 | Current working directory relative to project root |
+| `git` | 🐙 | Git repository status (clean/dirty/staged) and branch name |
+| `model` | 🧠 | AI model name (e.g., "Sonnet 4.5") |
+| `context` | ⏬ | Context usage (remaining % before full/compact, max tokens) |
+| `cost` | 💵 | Total session cost in USD (cumulative across context resets) |
+| `lines` | 📝 | Lines added/removed during session (vanity metric, doesn't reset with context) |
+| `duration` | ⏱️ | Total session duration in hours/minutes (cumulative across context resets) |
+
+**Note on metrics:**
+- **Actionable**: `git` status tells you if you need to commit changes
+- **Informational**: `context` shows when compaction will occur
+- **Vanity metrics**: `cost`, `lines`, and `duration` are cumulative session stats that don't reset with `/clear`
 
 ## Config
 
@@ -490,32 +518,45 @@ Customize the icons used to indicate git repository status (staged/clean/dirty).
 
 Controls the layout and ordering of statusline components. You can use predefined layouts or create custom layouts.
 
-**Default:** `"layout-1-line"` (single line layout)
+**Default:** `"extend"` (single line with cost and duration)
 
 **Predefined Layouts:**
-- `"layout-1-line"` - Single line with all components (default): `["project cwd git model context"]`
+- `"normal"` - Basic info only: `["project cwd git model context"]`
+- `"extend"` - Adds cost & duration: `["project cwd git model context cost duration"]` (default)
+- `"full"` - Everything including lines: `["project cwd git model context cost lines duration"]`
+- `"layout-1-line"` - Legacy alias for `normal`
 - `"layout-2-line"` - Two lines: `["project cwd", "git model context"]`
 
-**Available components for custom layouts:**
-- `project` - Project directory (📦 project-name)
-- `cwd` - Current working directory (📁 relative/path)
-- `git` - Git info (🐙 ⎇ branch)
-- `model` - Model name (🧠 Model)
-- `context` - Context usage (⏬ 89%✦67%⚡️200K)
+**Available widgets for custom layouts:**
+
+You can use any combination of: `project`, `cwd`, `git`, `model`, `context`, `cost`, `lines`, `duration`
+
+See the [Available Widgets](#available-widgets) section for details on what each widget displays.
 
 **Examples:**
 
-Using predefined single-line layout:
+Using predefined layouts:
 ```json
 {
-  "render-layout": "layout-1-line"
+  "render-layout": "normal"  // Basic info only
 }
 ```
 
-Using predefined two-line layout:
 ```json
 {
-  "render-layout": "layout-2-line"
+  "render-layout": "extend"  // Adds cost & duration (default)
+}
+```
+
+```json
+{
+  "render-layout": "full"  // Everything including lines
+}
+```
+
+```json
+{
+  "render-layout": "layout-1-line"  // Legacy alias for "normal"
 }
 ```
 
