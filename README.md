@@ -2,7 +2,7 @@
 
 A TypeScript statusline for Claude CLI that displays project info, git status, model, and context usage with color-coded indicators.
 
-[![npm version](https://badge.fury.io/js/claude-cli-statusline.svg)](https://badge.fury.io/js/claude-cli-statusline)
+[![npm version](https://img.shields.io/npm/v/claude-cli-statusline.svg)](https://www.npmjs.com/package/claude-cli-statusline)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Installation
