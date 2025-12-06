@@ -11,6 +11,7 @@ import type { StatusLineInput, SessionAnalysisCache } from "./src/types.ts";
 import { ConfigLoader } from "./src/services/ConfigLoader.ts";
 import { SessionAnalyzer } from "./src/services/SessionAnalyzer.ts";
 import { CacheManager } from "./src/services/CacheManager.ts";
+import { ClaudeConfigReader } from "./src/services/ClaudeConfigReader.ts";
 import { WorkDir } from "./src/components/WorkDir.ts";
 import { GitInfo } from "./src/components/GitInfo.ts";
 import { ModelInfo } from "./src/components/ModelInfo.ts";
@@ -104,6 +105,9 @@ async function main() {
   );
   const model = ModelInfo.fromInput(input, config);
 
+  // Step 5.5: Read auto-compact setting from Claude CLI config
+  const autoCompactEnabled = ClaudeConfigReader.readAutoCompactEnabled();
+
   // Step 6: Create context with analyzed data
   const context = ContextInfo.fromData(
     usedTokens,
@@ -111,7 +115,8 @@ async function main() {
     config["compact-buffer"],
     compactOccurred,
     config["context-color-levels"],
-    model.matchIndicator
+    model.matchIndicator,
+    autoCompactEnabled
   );
 
   // Step 6.5: Create cost-related components

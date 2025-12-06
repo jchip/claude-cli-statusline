@@ -46,10 +46,16 @@ export class ContextRenderer {
     parts.push(color);
     parts.push(`${Math.round(remainingPercent)}%`);
     parts.push(ANSI_COLORS.reset);
-    parts.push(Icons.SEPARATOR);
-    parts.push(bufferColor);
-    parts.push(`${Math.round(remainingAfterBuffer)}%`);
-    parts.push(ANSI_COLORS.reset);
+
+    // Only show "remaining before auto-compact" percentage if auto-compact is enabled
+    // If autoCompactEnabled is null (unknown), show it to be safe
+    if (data.autoCompactEnabled !== false) {
+      parts.push(Icons.SEPARATOR);
+      parts.push(bufferColor);
+      parts.push(`${Math.round(remainingAfterBuffer)}%`);
+      parts.push(ANSI_COLORS.reset);
+    }
+
     parts.push(compactIcon);
     parts.push(maxTokensDisplay);
 

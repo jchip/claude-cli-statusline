@@ -17,7 +17,8 @@ export class ContextInfo {
     public readonly compactBuffer: number,
     public readonly compactOccurred: boolean,
     public readonly thresholds: ColorThresholds,
-    public readonly matchIndicator: string = ""
+    public readonly matchIndicator: string = "",
+    public readonly autoCompactEnabled: boolean | null = null
   ) {
     // Create data model
     this.data = new ContextData(
@@ -25,7 +26,8 @@ export class ContextInfo {
       maxTokens,
       compactBuffer,
       compactOccurred,
-      matchIndicator
+      matchIndicator,
+      autoCompactEnabled
     );
   }
 
@@ -93,7 +95,8 @@ export class ContextInfo {
     compactBuffer: number,
     compactOccurred: boolean,
     colorLevels: [number, number, number],
-    matchIndicator = ""
+    matchIndicator = "",
+    autoCompactEnabled: boolean | null = null
   ): ContextInfo {
     const thresholds: ColorThresholds = {
       green: colorLevels[0],
@@ -107,7 +110,8 @@ export class ContextInfo {
       compactBuffer,
       compactOccurred,
       thresholds,
-      matchIndicator
+      matchIndicator,
+      autoCompactEnabled
     );
   }
 }

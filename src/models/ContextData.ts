@@ -9,6 +9,7 @@ export class ContextData {
     public readonly maxTokens: number,
     public readonly compactBuffer: number,
     public readonly compactOccurred: boolean,
-    public readonly matchIndicator: string = ""
+    public readonly matchIndicator: string = "",
+    public readonly autoCompactEnabled: boolean | null = null
   ) {}
 }
