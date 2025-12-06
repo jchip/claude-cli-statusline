@@ -595,6 +595,54 @@ Minimal (git and context only):
 }
 ```
 
+## Model Isolation Feature
+
+**Problem:** Claude CLI updates the user-level settings (`~/.claude/settings.json`) whenever you change models. This causes all other CLI sessions to immediately pick up the model change, which is often unexpected behavior.
+
+**Solution:** The statusline automatically isolates model selections per project by moving them from user-level to project-level settings.
+
+### How it works
+
+When you change models in Claude CLI:
+
+1. **User picks a specific model** (e.g., Sonnet, Opus):
+   - Statusline detects the user settings file was recently modified (within 5 seconds)
+   - Moves `model` from `~/.claude/settings.json` to `.claude/settings.local.json` in your project
+   - Clears it from user settings so other projects aren't affected
+   - Result: This model choice only affects the current project
+
+2. **User picks "Default"**:
+   - Statusline detects user settings was recently modified with no model set
+   - Removes `model` from project-local settings if it was set before user settings
+   - Result: Project returns to using whatever default is configured
+
+### Benefits
+
+- ✓ Model selections are project-specific
+- ✓ Multiple Claude CLI sessions can use different models without interfering
+- ✓ Other projects maintain their own model preferences
+- ✓ Completely automatic - no manual file editing needed
+
+### Configuration
+
+This feature is enabled by default via the `clear-model` config option:
+
+```json
+{
+  "clear-model": true
+}
+```
+
+To disable (not recommended):
+
+```json
+{
+  "clear-model": false
+}
+```
+
+**Why enabled by default:** This fixes unexpected behavior where changing models in one terminal session affects all other sessions. Most users want project-specific model selections.
+
 ## Development
 
 ### Testing
