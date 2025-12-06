@@ -15,6 +15,9 @@ import { WorkDir } from "./src/components/WorkDir.ts";
 import { GitInfo } from "./src/components/GitInfo.ts";
 import { ModelInfo } from "./src/components/ModelInfo.ts";
 import { ContextInfo } from "./src/components/ContextInfo.ts";
+import { CostInfo } from "./src/components/CostInfo.ts";
+import { LinesChanged } from "./src/components/LinesChanged.ts";
+import { SessionDuration } from "./src/components/SessionDuration.ts";
 import { StatusLineComponents } from "./src/components/StatusLineComponents.ts";
 
 async function main() {
@@ -111,8 +114,13 @@ async function main() {
     model.matchIndicator
   );
 
+  // Step 6.5: Create cost-related components
+  const cost = CostInfo.fromInput(input);
+  const lines = LinesChanged.fromInput(input);
+  const duration = SessionDuration.fromInput(input);
+
   // Step 7: Build and render status line
-  const components = new StatusLineComponents(workDir, git, model, context, config);
+  const components = new StatusLineComponents(workDir, git, model, context, config, cost, lines, duration);
   const output = components.render();
 
   // Step 8: Output to stdout

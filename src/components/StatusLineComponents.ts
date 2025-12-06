@@ -6,6 +6,9 @@ import type { WorkDir } from "./WorkDir.ts";
 import type { GitInfo } from "./GitInfo.ts";
 import type { ModelInfo } from "./ModelInfo.ts";
 import type { ContextInfo } from "./ContextInfo.ts";
+import type { CostInfo } from "./CostInfo.ts";
+import type { LinesChanged } from "./LinesChanged.ts";
+import type { SessionDuration } from "./SessionDuration.ts";
 import type { Config } from "../types.ts";
 import { PREDEFINED_LAYOUTS } from "../types.ts";
 
@@ -15,7 +18,10 @@ export class StatusLineComponents {
     public readonly git: GitInfo,
     public readonly model: ModelInfo,
     public readonly context: ContextInfo,
-    public readonly config?: Config
+    public readonly config?: Config,
+    public readonly cost?: CostInfo,
+    public readonly lines?: LinesChanged,
+    public readonly duration?: SessionDuration
   ) {}
 
   render(): string {
@@ -31,6 +37,9 @@ export class StatusLineComponents {
       git: this.git.render(),
       model: this.model.render(),
       context: this.context.render(animationOptions),
+      cost: this.cost?.render() ?? "",
+      lines: this.lines?.render() ?? "",
+      duration: this.duration?.render() ?? "",
     };
 
     // Resolve layout (predefined or custom)
@@ -56,9 +65,14 @@ export class StatusLineComponents {
       return PREDEFINED_LAYOUTS["layout-1-line"];
     }
 
-    // If it's a string (predefined layout name), resolve it
+    // If it's a string, check if it's a predefined layout name
     if (typeof configLayout === "string") {
-      return PREDEFINED_LAYOUTS[configLayout as keyof typeof PREDEFINED_LAYOUTS] || PREDEFINED_LAYOUTS["layout-1-line"];
+      const predefined = PREDEFINED_LAYOUTS[configLayout as keyof typeof PREDEFINED_LAYOUTS];
+      if (predefined) {
+        return predefined;
+      }
+      // Otherwise treat as a custom single-line layout
+      return [configLayout];
     }
 
     // Otherwise it's a custom array

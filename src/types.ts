@@ -45,7 +45,13 @@ export interface StatusLineInput {
   };
   gitBranch?: string;
   budget?: Record<string, unknown>;
-  cost?: Record<string, unknown>;
+  cost?: {
+    total_cost_usd?: number;
+    total_duration_ms?: number;
+    total_api_duration_ms?: number;
+    total_lines_added?: number;
+    total_lines_removed?: number;
+  };
   [key: string]: unknown;
 }
 

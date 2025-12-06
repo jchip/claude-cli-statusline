@@ -21,4 +21,7 @@ export class Icons {
   static readonly GIT_CLEAN = "💎";
   static readonly GIT_DIRTY = "🛠️";
   static readonly GIT_STAGED = "📤";
+  static readonly COST = "💵";
+  static readonly LINES = "📝";
+  static readonly DURATION = "⏱️";
 }
