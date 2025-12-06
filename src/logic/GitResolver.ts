@@ -1,69 +1,106 @@
 /**
  * Business logic for git data resolution
- * Handles priority: input > cache > git command > transcript
+ * Handles priority: input > cache > single git call > transcript
  */
 
-import { GitService } from "../services/GitService.ts";
+import { GitService, type GitStatusResult } from "../services/GitService.ts";
 import { basename } from "../utils.ts";
+
+export interface ResolvedGitInfo {
+  branch: string | null;
+  repoName: string | null;
+  isClean: boolean | null;
+  hasStaged: boolean | null;
+  projectDirBasename: string;
+}
 
 export class GitResolver {
   /**
-   * Resolve git branch with priority order:
+   * Resolve all git info at once with priority:
    * 1. Input JSON (gitBranch field)
-   * 2. Cached value
-   * 3. Git command
-   * 4. Transcript file
+   * 2. Cached values
+   * 3. Single git call (branch, status, repo from config)
+   * 4. Transcript file (fallback for branch only)
    */
-  static resolveGitBranch(
-    inputGitBranch: string | undefined,
-    cachedBranch: string | null | undefined,
+  static resolve(
     dir: string,
+    inputGitBranch?: string,
+    cachedBranch?: string | null,
+    cachedRepoName?: string | null,
     transcriptPath?: string
-  ): string | null {
-    // Priority 1: Input JSON
+  ): ResolvedGitInfo {
+    const projectDirBasename = basename(dir);
+
+    // Priority 1: Use input branch if provided
     if (inputGitBranch) {
-      return inputGitBranch;
+      // Still need status from git, but branch is from input
+      const status = GitService.getGitStatus(dir);
+      return {
+        branch: inputGitBranch,
+        repoName: cachedRepoName ?? status.repoName,
+        isClean: status.gitDir ? status.isClean : null,
+        hasStaged: status.gitDir ? status.hasStaged : null,
+        projectDirBasename,
+      };
     }
 
-    // Priority 2: Cached value
+    // Priority 2: Use cached branch if available (null = cached as no branch, undefined = no cache)
     if (cachedBranch !== undefined) {
-      return cachedBranch;
+      if (cachedBranch === null) {
+        // Cache says no branch - trust it, no git call needed
+        return {
+          branch: null,
+          repoName: cachedRepoName ?? null,
+          isClean: null,
+          hasStaged: null,
+          projectDirBasename,
+        };
+      }
+      const status = GitService.getGitStatus(dir);
+      return {
+        branch: cachedBranch,
+        repoName: cachedRepoName ?? status.repoName,
+        isClean: status.gitDir ? status.isClean : null,
+        hasStaged: status.gitDir ? status.hasStaged : null,
+        projectDirBasename,
+      };
     }
 
-    // Priority 3: Git command
-    const branchFromCommand = GitService.getBranchFromCommand(dir);
-    if (branchFromCommand) {
-      return branchFromCommand;
+    // Priority 3: Single git call for everything
+    const status = GitService.getGitStatus(dir);
+
+    if (status.branch) {
+      return {
+        branch: status.branch,
+        repoName: cachedRepoName ?? status.repoName,
+        isClean: status.isClean,
+        hasStaged: status.hasStaged,
+        projectDirBasename,
+      };
     }
 
-    // Priority 4: Transcript file
+    // Priority 4: Fallback to transcript for branch
     if (transcriptPath) {
-      return GitService.getBranchFromTranscript(transcriptPath);
+      const transcriptBranch = GitService.getBranchFromTranscript(transcriptPath);
+      if (transcriptBranch) {
+        return {
+          branch: transcriptBranch,
+          repoName: cachedRepoName ?? status.repoName,
+          isClean: status.gitDir ? status.isClean : null,
+          hasStaged: status.gitDir ? status.hasStaged : null,
+          projectDirBasename,
+        };
+      }
     }
 
-    return null;
-  }
-
-  /**
-   * Resolve git repo name
-   * Only runs if branch exists
-   */
-  static resolveRepoName(
-    branch: string | null,
-    cachedRepoName: string | null | undefined,
-    dir: string
-  ): string | null {
-    if (!branch) {
-      return null;
-    }
-
-    // Use cached if available
-    if (cachedRepoName !== undefined) {
-      return cachedRepoName;
-    }
-
-    // Otherwise get from git command
-    return GitService.getRepoNameFromCommand(dir);
+    // No git info found
+    return {
+      branch: null,
+      repoName: null,
+      isClean: null,
+      hasStaged: null,
+      projectDirBasename,
+    };
   }
 
   /**
@@ -71,35 +108,5 @@ export class GitResolver {
    */
   static getProjectDirBasename(dir: string): string {
     return basename(dir);
-  }
-
-  /**
-   * Check if working tree is clean
-   * Only runs if branch exists
-   */
-  static resolveWorkingTreeStatus(
-    branch: string | null,
-    dir: string
-  ): boolean | null {
-    if (!branch) {
-      return null;
-    }
-
-    return GitService.isWorkingTreeClean(dir);
-  }
-
-  /**
-   * Check if there are staged changes
-   * Only runs if branch exists
-   */
-  static resolveStagedStatus(
-    branch: string | null,
-    dir: string
-  ): boolean | null {
-    if (!branch) {
-      return null;
-    }
-
-    return GitService.hasStagedChanges(dir);
   }
 }

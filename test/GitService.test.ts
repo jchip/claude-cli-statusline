@@ -4,109 +4,127 @@ import { writeFileSync, mkdirSync, rmSync, existsSync } from "fs";
 import { join } from "path";
 
 describe("GitService", () => {
-  test("gets branch from command for valid git directory", () => {
-    const branch = GitService.getBranchFromCommand(process.cwd());
-    expect(branch).not.toBeNull();
-    expect(typeof branch).toBe("string");
+  describe("findGitDir", () => {
+    test("finds .git in current directory", () => {
+      const gitDir = GitService.findGitDir(process.cwd());
+      expect(gitDir).not.toBeNull();
+      expect(gitDir).toContain(".git");
+    });
+
+    test("finds .git when starting from subdirectory", () => {
+      const gitDir = GitService.findGitDir(join(process.cwd(), "src"));
+      expect(gitDir).not.toBeNull();
+      expect(gitDir).toContain(".git");
+    });
+
+    test("returns null for non-git directory", () => {
+      const gitDir = GitService.findGitDir("/tmp");
+      expect(gitDir).toBeNull();
+    });
   });
 
-  test("returns null for non-git directory", () => {
-    const branch = GitService.getBranchFromCommand("/tmp");
-    expect(branch).toBeNull();
+  describe("getRepoNameFromConfig", () => {
+    test("gets repo name from .git/config", () => {
+      const gitDir = GitService.findGitDir(process.cwd());
+      expect(gitDir).not.toBeNull();
+      const repoName = GitService.getRepoNameFromConfig(gitDir!);
+      expect(repoName).toBe("claude-cli-statusline");
+    });
+
+    test("returns null for invalid gitDir", () => {
+      const repoName = GitService.getRepoNameFromConfig("/tmp/nonexistent");
+      expect(repoName).toBeNull();
+    });
   });
 
-  test("gets repo name from command for valid git directory", () => {
-    const repoName = GitService.getRepoNameFromCommand(process.cwd());
-    expect(repoName).not.toBeNull();
-    expect(typeof repoName).toBe("string");
+  describe("getGitStatus", () => {
+    test("gets full status for valid git directory", () => {
+      const status = GitService.getGitStatus(process.cwd());
+      expect(status.branch).not.toBeNull();
+      expect(status.gitDir).not.toBeNull();
+      expect(typeof status.isClean).toBe("boolean");
+      expect(typeof status.hasStaged).toBe("boolean");
+    });
+
+    test("returns null branch for non-git directory", () => {
+      const status = GitService.getGitStatus("/tmp");
+      expect(status.branch).toBeNull();
+      expect(status.gitDir).toBeNull();
+    });
+
+    test("returns all fields in single call", () => {
+      const status = GitService.getGitStatus(process.cwd());
+      expect(status).toHaveProperty("branch");
+      expect(status).toHaveProperty("isClean");
+      expect(status).toHaveProperty("hasStaged");
+      expect(status).toHaveProperty("repoName");
+      expect(status).toHaveProperty("gitDir");
+    });
   });
 
-  test("returns null repo name for non-git directory", () => {
-    const repoName = GitService.getRepoNameFromCommand("/tmp");
-    expect(repoName).toBeNull();
-  });
+  describe("getBranchFromTranscript", () => {
+    test("gets branch from transcript file", () => {
+      const testDir = "/tmp/test-git-service";
+      const transcriptPath = join(testDir, "test.jsonl");
 
-  test("gets branch from transcript file", () => {
-    const testDir = "/tmp/test-git-service";
-    const transcriptPath = join(testDir, "test.jsonl");
+      if (existsSync(testDir)) {
+        rmSync(testDir, { recursive: true });
+      }
+      mkdirSync(testDir, { recursive: true });
 
-    // Cleanup if exists
-    if (existsSync(testDir)) {
+      const lines = [
+        JSON.stringify({ type: "message", content: "test" }),
+        JSON.stringify({ type: "user", gitBranch: "feature-branch" }),
+      ];
+      writeFileSync(transcriptPath, lines.join("\n"));
+
+      const branch = GitService.getBranchFromTranscript(transcriptPath);
+      expect(branch).toBe("feature-branch");
+
       rmSync(testDir, { recursive: true });
-    }
-    mkdirSync(testDir, { recursive: true });
+    });
 
-    // Create transcript with gitBranch
-    const lines = [
-      JSON.stringify({ type: "message", content: "test" }),
-      JSON.stringify({ type: "user", gitBranch: "feature-branch" }),
-    ];
-    writeFileSync(transcriptPath, lines.join("\n"));
+    test("returns null for non-existent transcript", () => {
+      const branch = GitService.getBranchFromTranscript("/non/existent/file.jsonl");
+      expect(branch).toBeNull();
+    });
 
-    const branch = GitService.getBranchFromTranscript(transcriptPath);
-    expect(branch).toBe("feature-branch");
+    test("returns null for transcript without gitBranch", () => {
+      const testDir = "/tmp/test-git-service-2";
+      const transcriptPath = join(testDir, "test.jsonl");
 
-    // Cleanup
-    rmSync(testDir, { recursive: true });
-  });
+      if (existsSync(testDir)) {
+        rmSync(testDir, { recursive: true });
+      }
+      mkdirSync(testDir, { recursive: true });
 
-  test("returns null for non-existent transcript", () => {
-    const branch = GitService.getBranchFromTranscript("/non/existent/file.jsonl");
-    expect(branch).toBeNull();
-  });
+      const lines = [
+        JSON.stringify({ type: "message", content: "test" }),
+        JSON.stringify({ type: "user", content: "hello" }),
+      ];
+      writeFileSync(transcriptPath, lines.join("\n"));
 
-  test("returns null for transcript without gitBranch", () => {
-    const testDir = "/tmp/test-git-service-2";
-    const transcriptPath = join(testDir, "test.jsonl");
+      const branch = GitService.getBranchFromTranscript(transcriptPath);
+      expect(branch).toBeNull();
 
-    // Cleanup if exists
-    if (existsSync(testDir)) {
       rmSync(testDir, { recursive: true });
-    }
-    mkdirSync(testDir, { recursive: true });
+    });
 
-    // Create transcript without gitBranch
-    const lines = [
-      JSON.stringify({ type: "message", content: "test" }),
-      JSON.stringify({ type: "user", content: "hello" }),
-    ];
-    writeFileSync(transcriptPath, lines.join("\n"));
+    test("handles malformed JSON in transcript", () => {
+      const testDir = "/tmp/test-git-service-3";
+      const transcriptPath = join(testDir, "test.jsonl");
 
-    const branch = GitService.getBranchFromTranscript(transcriptPath);
-    expect(branch).toBeNull();
+      if (existsSync(testDir)) {
+        rmSync(testDir, { recursive: true });
+      }
+      mkdirSync(testDir, { recursive: true });
 
-    // Cleanup
-    rmSync(testDir, { recursive: true });
-  });
+      writeFileSync(transcriptPath, "invalid json\n{valid: but no gitBranch}");
 
-  test("handles malformed JSON in transcript", () => {
-    const testDir = "/tmp/test-git-service-3";
-    const transcriptPath = join(testDir, "test.jsonl");
+      const branch = GitService.getBranchFromTranscript(transcriptPath);
+      expect(branch).toBeNull();
 
-    // Cleanup if exists
-    if (existsSync(testDir)) {
       rmSync(testDir, { recursive: true });
-    }
-    mkdirSync(testDir, { recursive: true });
-
-    // Create transcript with invalid JSON
-    writeFileSync(transcriptPath, "invalid json\n{valid: but no gitBranch}");
-
-    const branch = GitService.getBranchFromTranscript(transcriptPath);
-    expect(branch).toBeNull();
-
-    // Cleanup
-    rmSync(testDir, { recursive: true });
-  });
-
-  test("checks if working tree is clean for valid git directory", () => {
-    const isClean = GitService.isWorkingTreeClean(process.cwd());
-    expect(isClean).not.toBeNull();
-    expect(typeof isClean).toBe("boolean");
-  });
-
-  test("returns null for working tree status in non-git directory", () => {
-    const isClean = GitService.isWorkingTreeClean("/tmp");
-    expect(isClean).toBeNull();
+    });
   });
 });

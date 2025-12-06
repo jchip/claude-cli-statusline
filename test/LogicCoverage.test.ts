@@ -50,47 +50,44 @@ describe("LogicCoverage", () => {
     expect(result).toBe("project");
   });
 
-  test("GitResolver.resolveGitBranch priority order", () => {
+  test("GitResolver.resolve priority order", () => {
     // Input branch has highest priority
-    const result1 = GitResolver.resolveGitBranch(
+    const result1 = GitResolver.resolve(
+      process.cwd(),
       "input-branch",
       "cached-branch",
-      process.cwd(),
-      undefined
+      "cached-repo"
     );
-    expect(result1).toBe("input-branch");
+    expect(result1.branch).toBe("input-branch");
 
     // Cached branch second priority
-    const result2 = GitResolver.resolveGitBranch(
+    const result2 = GitResolver.resolve(
+      process.cwd(),
       undefined,
       "cached-branch",
-      process.cwd(),
-      undefined
+      "cached-repo"
     );
-    expect(result2).toBe("cached-branch");
+    expect(result2.branch).toBe("cached-branch");
 
     // Falls back to git command
-    const result3 = GitResolver.resolveGitBranch(
-      undefined,
-      undefined,
-      process.cwd(),
-      undefined
-    );
-    expect(result3).not.toBeNull();
+    const result3 = GitResolver.resolve(process.cwd());
+    expect(result3.branch).not.toBeNull();
   });
 
-  test("GitResolver.resolveRepoName with no branch", () => {
-    const result = GitResolver.resolveRepoName(null, undefined, process.cwd());
-    expect(result).toBeNull();
+  test("GitResolver.resolve returns null for non-git directory", () => {
+    const result = GitResolver.resolve("/tmp");
+    expect(result.branch).toBeNull();
+    expect(result.repoName).toBeNull();
   });
 
-  test("GitResolver.resolveRepoName with cached value", () => {
-    const result = GitResolver.resolveRepoName(
-      "main",
-      "cached-repo",
-      process.cwd()
+  test("GitResolver.resolve uses cached repo name", () => {
+    const result = GitResolver.resolve(
+      "/tmp",
+      "input-branch",
+      undefined,
+      "cached-repo"
     );
-    expect(result).toBe("cached-repo");
+    expect(result.repoName).toBe("cached-repo");
   });
 
   test("ModelMatcher.matchByModelId with exact match", () => {

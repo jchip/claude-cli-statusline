@@ -47,29 +47,23 @@ export class GitInfo {
     showGitRepoNameConfig: boolean = false,
     statusIcons?: { clean: string; dirty: string; staged: string }
   ): GitInfo {
-    const projectDirBasename = GitResolver.getProjectDirBasename(dir);
-
-    // Resolve branch using priority logic
-    const branch = GitResolver.resolveGitBranch(
+    // Single unified resolution - one git call max
+    const resolved = GitResolver.resolve(
+      dir,
       inputGitBranch,
       cachedBranch,
-      dir,
+      cachedRepoName,
       transcriptPath
     );
 
-    // Resolve repo name
-    const repoName = GitResolver.resolveRepoName(
-      branch,
-      cachedRepoName,
-      dir
+    return new GitInfo(
+      resolved.repoName,
+      resolved.branch,
+      resolved.projectDirBasename,
+      showGitRepoNameConfig,
+      resolved.isClean,
+      resolved.hasStaged,
+      statusIcons
     );
-
-    // Check working tree status
-    const isClean = GitResolver.resolveWorkingTreeStatus(branch, dir);
-
-    // Check staged status
-    const hasStaged = GitResolver.resolveStagedStatus(branch, dir);
-
-    return new GitInfo(repoName, branch, projectDirBasename, showGitRepoNameConfig, isClean, hasStaged, statusIcons);
   }
 }
