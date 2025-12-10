@@ -1,6 +1,6 @@
 {
   "name": "claude-cli-statusline",
-  "version": "1.2.6",
+  "version": "1.3.0",
   "description": "A bun TypeScript statusline for Claude CLI with color-coded context usage indicators",
   "main": "index.ts",
   "type": "module",
