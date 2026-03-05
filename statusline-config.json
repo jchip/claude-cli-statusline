@@ -15,11 +15,15 @@
   },
   "display-name-model-context-windows": {
     "Sonnet 4.5": 200000,
+    "Sonnet 4.6": 200000,
     "Sonnet 4.5 (1M context)": 1000000,
+    "Sonnet 4.6 (1M context)": 1000000,
     "Sonnet 4": 200000,
     "Opus 4": 200000,
     "Opus 4.1": 200000,
     "Opus 4.5": 200000,
+    "Opus 4.6": 200000,
+    "Opus 4.6 (1M context)": 1000000,
     "Haiku 4": 200000
   },
   "default-context-window": 200000,
