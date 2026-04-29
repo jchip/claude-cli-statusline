@@ -93,6 +93,16 @@ async function main() {
     compactOccurred = analysis.compactOccurred;
   }
 
+  // Use context_window.current_usage from input if available (new CLI format)
+  // This is more accurate than transcript analysis and works even without a transcript file
+  const cwUsage = input.context_window?.current_usage;
+  if (cwUsage) {
+    usedTokens =
+      (cwUsage.input_tokens || 0) +
+      (cwUsage.cache_creation_input_tokens || 0) +
+      (cwUsage.cache_read_input_tokens || 0);
+  }
+
   // Step 5: Gather component data (git uses input JSON, then cached values)
   const workDir = WorkDir.fromInput(input, config["show-project-full-dir"] ?? false);
   const git = GitInfo.fromDirectory(
@@ -110,10 +120,12 @@ async function main() {
   const autoCompactEnabled = ClaudeConfigReader.readAutoCompactEnabled();
 
   // Step 6: Create context with analyzed data
+  // Use context_window_size from input if available, otherwise fall back to model config
+  const maxTokens = input.context_window?.context_window_size || model.maxTokens;
   const exceeds200k = input.exceeds_200k_tokens ?? false;
   const context = ContextInfo.fromData(
     usedTokens,
-    model.maxTokens,
+    maxTokens,
     config["compact-buffer"],
     compactOccurred,
     config["context-color-levels"],
