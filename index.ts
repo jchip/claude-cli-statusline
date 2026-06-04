@@ -25,7 +25,7 @@ import { StatusLineComponents } from "./src/components/StatusLineComponents.ts";
 async function main() {
   // Step 1: Parse CLI arguments
   const args = process.argv.slice(2);
-  const { configFile, colorLevels, saveSample, saveSampleFilename, layout, spinner, clearModel } =
+  const { configFile, colorLevels, saveSample, saveSampleFilename, layout, spinner, clearModel, autoWidth } =
     ConfigLoader.parseArgs(args);
 
   // Step 2: Read input from stdin
@@ -65,7 +65,8 @@ async function main() {
     saveSampleFilename,
     layout,
     spinner,
-    clearModel
+    clearModel,
+    autoWidth
   );
 
   // Step 3.5: Clear model from settings.json (unless explicitly disabled)

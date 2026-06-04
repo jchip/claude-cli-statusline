@@ -23,6 +23,7 @@ export interface Config {
   "show-git-repo-name"?: boolean;
   "show-project-full-dir"?: boolean;
   "render-layout"?: string[] | string;
+  "auto-wrap-width"?: number;
   "git-status-icons"?: {
     clean: string;
     dirty: string;

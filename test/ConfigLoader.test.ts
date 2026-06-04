@@ -127,10 +127,27 @@ describe("ConfigLoader", () => {
     expect(parsed.saveSampleFilename).toBe("custom.json");
   });
 
+  test("parses --auto-width argument", () => {
+    const parsed = ConfigLoader.parseArgs(["--auto-width=50"]);
+    expect(parsed.autoWidth).toBe(50);
+  });
+
+  test("ignores invalid --auto-width values", () => {
+    expect(ConfigLoader.parseArgs(["--auto-width=abc"]).autoWidth).toBeNull();
+    expect(ConfigLoader.parseArgs(["--auto-width=0"]).autoWidth).toBeNull();
+    expect(ConfigLoader.parseArgs(["--auto-width=-5"]).autoWidth).toBeNull();
+  });
+
   test("applies color level overrides", () => {
     const config = ConfigLoader.load(projectDir);
     const overridden = ConfigLoader.applyOverrides(config, [80, 60, 40], false, null, null, null, false);
     expect(overridden["context-color-levels"]).toEqual([80, 60, 40]);
+  });
+
+  test("applies auto-width override", () => {
+    const config = ConfigLoader.load(projectDir);
+    const overridden = ConfigLoader.applyOverrides(config, null, false, null, null, null, false, 50);
+    expect(overridden["auto-wrap-width"]).toBe(50);
   });
 
   test("applies save sample overrides", () => {

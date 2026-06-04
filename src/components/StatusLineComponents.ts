@@ -12,6 +12,7 @@ import type { SessionDuration } from "./SessionDuration.ts";
 import type { SubagentInfo } from "./SubagentInfo.ts";
 import type { Config } from "../types.ts";
 import { PREDEFINED_LAYOUTS } from "../types.ts";
+import { wrapBalanced } from "../logic/LayoutWrapper.ts";
 
 export class StatusLineComponents {
   constructor(
@@ -47,6 +48,17 @@ export class StatusLineComponents {
 
     // Resolve layout (predefined or custom)
     const layout = this.resolveLayout();
+
+    // Auto-wrap mode: flatten the layout into a single ordered list of parts
+    // and balance-wrap them to the configured width.
+    const autoWidth = this.config?.["auto-wrap-width"];
+    if (autoWidth && autoWidth > 0) {
+      const parts = layout
+        .flatMap((lineSpec) => lineSpec.trim().split(/\s+/))
+        .map((name) => componentMap[name])
+        .filter((part) => part); // Filter out undefined/empty
+      return wrapBalanced(parts, autoWidth).join("\n");
+    }
 
     // Build each line by parsing component names from layout strings
     const lines = layout.map((lineSpec) => {

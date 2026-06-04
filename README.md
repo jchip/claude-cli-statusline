@@ -262,6 +262,33 @@ Specify the statusline layout. Can be a predefined layout name or a custom layou
 
 **Note:** This CLI flag overrides the `render-layout` setting in the config file.
 
+### `--auto-width=<columns>`
+
+Enable auto-wrap mode. All widgets from the current layout are flattened into a
+single ordered list and packed into balanced lines around the given width.
+Wrapping only kicks in when the content exceeds the width — otherwise everything
+stays on one line.
+
+Width is measured in terminal cells: ANSI color codes are ignored and emoji are
+counted as 2 cells. The width is a **soft target**, not a hard cap: line breaks
+are chosen to minimize total raggedness, and a line may spill slightly over the
+target when that absorbs a widget (e.g. a short `cwd`) that would otherwise be
+stranded alone on its own line. A widget wider than the target always overflows
+(it can't be split). This avoids both lopsided and orphaned lines.
+
+**Example:**
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bun ~/claude-cli-statusline/index.ts --layout=full --auto-width=50"
+  }
+}
+```
+
+**Note:** This CLI flag overrides the `auto-wrap-width` setting in the config file. Set to `0` or omit to disable.
+
 ### `--spinner=<style>`
 
 Specify the animated spinner style. Choose from 16 different styles.
@@ -600,6 +627,45 @@ Minimal (git and context only):
   "render-layout": ["git context"]
 }
 ```
+
+### `auto-wrap-width`
+
+Enable auto-wrap mode by setting a target width (in terminal columns). When set
+to a positive number, the widgets from `render-layout` are flattened into a
+single ordered list and packed into **balanced** lines that stay within the
+width. Wrapping only happens when the content exceeds the width — otherwise it
+stays on one line.
+
+**Default:** unset (disabled)
+
+Width is measured in visible terminal cells: ANSI color codes are ignored and
+emoji/wide glyphs count as 2 cells. The width is a **soft target** rather than a
+hard cap: line breaks are chosen to minimize total raggedness (how far each line
+sits from the target), and a line may spill slightly over the target when that
+absorbs a widget that would otherwise be stranded alone on a short line. This
+spreads content evenly and avoids orphaned lines. A widget wider than the target
+always overflows, since it can't be split.
+
+**Example:**
+
+```json
+{
+  "render-layout": "full",
+  "auto-wrap-width": 50
+}
+```
+
+With the `full` layout and a width of `50`, a long status line is split into
+balanced lines, for example:
+
+```
+📦 claude-cli-statusline 📁 src/components
+🐙🛠️ ⎇ main 🧠 Opus 4.8 ⏬ 88%⚡️1M🚀
+💵 $1.23 📝 +120/−45 ⏱️ 1h
+```
+
+**Note:** The `--auto-width=<columns>` CLI flag overrides this setting. Order of
+the widgets comes from `render-layout`; the width only controls wrapping.
 
 ## Model Isolation Feature
 

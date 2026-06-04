@@ -6,6 +6,7 @@ import {
   getRelativePath,
   basename,
   findPercentInObject,
+  visibleWidth,
 } from "../src/utils.ts";
 
 describe("shortenHome", () => {
@@ -34,6 +35,37 @@ describe("clamp", () => {
     expect(clamp(150)).toBe(100);
     expect(clamp(-10)).toBe(0);
     expect(clamp(50)).toBe(50);
+  });
+});
+
+describe("visibleWidth", () => {
+  test("counts plain ASCII as 1 cell each", () => {
+    expect(visibleWidth("main")).toBe(4);
+    expect(visibleWidth("")).toBe(0);
+  });
+
+  test("ignores ANSI color codes", () => {
+    expect(visibleWidth("\x1b[32mmain\x1b[0m")).toBe(4);
+    expect(visibleWidth("\x1b[38;5;208mok\x1b[0m")).toBe(2);
+  });
+
+  test("counts emoji as 2 cells", () => {
+    expect(visibleWidth("💎")).toBe(2);
+    expect(visibleWidth("💎 main")).toBe(7); // 2 + 1 + 4
+    expect(visibleWidth("🚀")).toBe(2);
+  });
+
+  test("treats variation selectors as zero-width", () => {
+    // 🛠️ is 🛠 (wide) + U+FE0F (zero width)
+    expect(visibleWidth("🛠️")).toBe(2);
+    // ⚠️ is U+26A0 (wide) + U+FE0F
+    expect(visibleWidth("⚠️")).toBe(2);
+  });
+
+  test("counts narrow box-drawing/arrow glyphs as 1 cell", () => {
+    expect(visibleWidth("▁▂▃")).toBe(3); // sparkline bars
+    expect(visibleWidth("↗")).toBe(1); // trend arrow
+    expect(visibleWidth("◐")).toBe(1); // circular spinner frame
   });
 });
 

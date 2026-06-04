@@ -45,6 +45,7 @@
   "show-git-repo-name": false,
   "show-project-full-dir": false,
   "render-layout": "extend",
+  "auto-wrap-width": 55,
   "git-status-icons": {
     "clean": "💎",
     "dirty": "🛠️",

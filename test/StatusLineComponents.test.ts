@@ -379,4 +379,66 @@ describe("StatusLineComponents", () => {
     expect(lines[1]).toContain("🧠");
     expect(lines[1]).toContain("⏬");
   });
+
+  test("auto-wraps to multiple lines when auto-wrap-width is set", () => {
+    const workDir = new WorkDir("/home/user/my-long-project-name", "/home/user/my-long-project-name");
+    const git = new GitInfo("my-long-project-name", "feature-branch", "my-long-project-name");
+    const model = new ModelInfo("test-id", "Sonnet 4.5", "Sonnet 4.5", 200000, "id");
+    const context = new ContextInfo(50000, 200000, 45000, false, {
+      green: 65,
+      yellow: 45,
+      orange: 20,
+    });
+
+    const config = {
+      "context-color-levels": [65, 45, 20] as [number, number, number],
+      "model-context-windows": {},
+      "display-name-model-context-windows": {},
+      "model-display-name-map": {},
+      "default-context-window": 200000,
+      "compact-buffer": 45000,
+      "save-sample": { enabled: false, filename: "" },
+      "render-layout": "normal" as const,
+      "auto-wrap-width": 30,
+    };
+
+    const components = new StatusLineComponents(workDir, git, model, context, config);
+    const output = components.render();
+
+    // Narrow width forces wrapping across lines
+    expect(output).toContain("\n");
+    // All components still present, none dropped
+    expect(output).toContain("📦");
+    expect(output).toContain("🐙");
+    expect(output).toContain("🧠");
+    expect(output).toContain("⏬");
+  });
+
+  test("auto-wrap stays on one line when content fits the width", () => {
+    const workDir = new WorkDir("/home/user/p", "/home/user/p");
+    const git = new GitInfo("p", "main", "p");
+    const model = new ModelInfo("test-id", "X", "X", 200000, "id");
+    const context = new ContextInfo(50000, 200000, 45000, false, {
+      green: 65,
+      yellow: 45,
+      orange: 20,
+    });
+
+    const config = {
+      "context-color-levels": [65, 45, 20] as [number, number, number],
+      "model-context-windows": {},
+      "display-name-model-context-windows": {},
+      "model-display-name-map": {},
+      "default-context-window": 200000,
+      "compact-buffer": 45000,
+      "save-sample": { enabled: false, filename: "" },
+      "render-layout": "normal" as const,
+      "auto-wrap-width": 200,
+    };
+
+    const components = new StatusLineComponents(workDir, git, model, context, config);
+    const output = components.render();
+
+    expect(output).not.toContain("\n");
+  });
 });

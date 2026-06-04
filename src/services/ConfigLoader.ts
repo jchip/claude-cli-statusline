@@ -150,6 +150,7 @@ export class ConfigLoader {
     layout: string | null;
     spinner: string | null;
     clearModel: boolean;
+    autoWidth: number | null;
   } {
     let configFile = "statusline-config.json";
     let colorLevels: [number, number, number] | null = null;
@@ -158,6 +159,7 @@ export class ConfigLoader {
     let layout: string | null = null;
     let spinner: string | null = null;
     let clearModel = false;
+    let autoWidth: number | null = null;
 
     for (const arg of args) {
       if (arg.startsWith("--config=")) {
@@ -187,10 +189,15 @@ export class ConfigLoader {
         spinner = arg.slice("--spinner=".length);
       } else if (arg === "--clear-model") {
         clearModel = true;
+      } else if (arg.startsWith("--auto-width=")) {
+        const width = parseInt(arg.slice("--auto-width=".length), 10);
+        if (!isNaN(width) && width > 0) {
+          autoWidth = width;
+        }
       }
     }
 
-    return { configFile, colorLevels, saveSample, saveSampleFilename, layout, spinner, clearModel };
+    return { configFile, colorLevels, saveSample, saveSampleFilename, layout, spinner, clearModel, autoWidth };
   }
 
   /**
@@ -203,7 +210,8 @@ export class ConfigLoader {
     saveSampleFilename: string | null,
     layout: string | null,
     spinner: string | null,
-    clearModel: boolean
+    clearModel: boolean,
+    autoWidth: number | null = null
   ): Config {
     const result = { ...config };
 
@@ -231,6 +239,10 @@ export class ConfigLoader {
 
     if (clearModel) {
       result["clear-model"] = true;
+    }
+
+    if (autoWidth !== null) {
+      result["auto-wrap-width"] = autoWidth;
     }
 
     return result;
