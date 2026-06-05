@@ -4,15 +4,20 @@
 
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { readFile, writeFile, stat } from "fs/promises";
-import { join, isAbsolute } from "path";
+import { join, isAbsolute, dirname } from "path";
+import { fileURLToPath } from "url";
 import type { Config } from "../types.ts";
+
+// Directory of this module, cross-runtime (Bun + Node).
+// import.meta.url is supported by both; import.meta.dir is Bun-only.
+const moduleDir = dirname(fileURLToPath(import.meta.url));
 
 export class ConfigLoader {
   /**
    * Load default configuration from package directory
    */
   private static loadDefaultConfig(): Config {
-    const defaultConfigPath = join(import.meta.dir, "..", "..", "statusline-config.json");
+    const defaultConfigPath = join(moduleDir, "..", "..", "statusline-config.json");
     try {
       const content = readFileSync(defaultConfigPath, "utf-8");
       return JSON.parse(content);

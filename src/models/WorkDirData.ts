@@ -4,10 +4,20 @@
  */
 
 export class WorkDirData {
+  readonly projectDir: string;
+  readonly currentDir: string;
+  readonly projectDirDisplay: string;
+  readonly relativePath: string;
+
   constructor(
-    public readonly projectDir: string,
-    public readonly currentDir: string,
-    public readonly projectDirDisplay: string,
-    public readonly relativePath: string
-  ) {}
+    projectDir: string,
+    currentDir: string,
+    projectDirDisplay: string,
+    relativePath: string
+  ) {
+    this.projectDir = projectDir;
+    this.currentDir = currentDir;
+    this.projectDirDisplay = projectDirDisplay;
+    this.relativePath = relativePath;
+  }
 }

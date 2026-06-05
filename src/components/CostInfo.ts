@@ -8,7 +8,11 @@ import { Icons } from "../icons.ts";
 import { ANSI_COLORS } from "../types.ts";
 
 export class CostInfo {
-  constructor(public readonly costUsd: number | null) {}
+  readonly costUsd: number | null;
+
+  constructor(costUsd: number | null) {
+    this.costUsd = costUsd;
+  }
 
   render(): string {
     if (this.costUsd === null) {

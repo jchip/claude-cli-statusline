@@ -8,7 +8,11 @@ import { Icons } from "../icons.ts";
 import { ANSI_COLORS } from "../types.ts";
 
 export class SubagentInfo {
-  constructor(public readonly subagentType: string | null) {}
+  readonly subagentType: string | null;
+
+  constructor(subagentType: string | null) {
+    this.subagentType = subagentType;
+  }
 
   render(): string {
     if (!this.subagentType) {

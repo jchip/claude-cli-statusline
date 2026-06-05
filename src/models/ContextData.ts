@@ -4,13 +4,29 @@
  */
 
 export class ContextData {
+  readonly usedTokens: number;
+  readonly maxTokens: number;
+  readonly compactBuffer: number;
+  readonly compactOccurred: boolean;
+  readonly matchIndicator: string;
+  readonly autoCompactEnabled: boolean | null;
+  readonly exceeds200k: boolean;
+
   constructor(
-    public readonly usedTokens: number,
-    public readonly maxTokens: number,
-    public readonly compactBuffer: number,
-    public readonly compactOccurred: boolean,
-    public readonly matchIndicator: string = "",
-    public readonly autoCompactEnabled: boolean | null = null,
-    public readonly exceeds200k: boolean = false
-  ) {}
+    usedTokens: number,
+    maxTokens: number,
+    compactBuffer: number,
+    compactOccurred: boolean,
+    matchIndicator: string = "",
+    autoCompactEnabled: boolean | null = null,
+    exceeds200k: boolean = false
+  ) {
+    this.usedTokens = usedTokens;
+    this.maxTokens = maxTokens;
+    this.compactBuffer = compactBuffer;
+    this.compactOccurred = compactOccurred;
+    this.matchIndicator = matchIndicator;
+    this.autoCompactEnabled = autoCompactEnabled;
+    this.exceeds200k = exceeds200k;
+  }
 }

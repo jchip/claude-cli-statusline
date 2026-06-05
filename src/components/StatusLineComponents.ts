@@ -15,17 +15,37 @@ import { PREDEFINED_LAYOUTS } from "../types.ts";
 import { wrapBalanced } from "../logic/LayoutWrapper.ts";
 
 export class StatusLineComponents {
+  readonly workDir: WorkDir;
+  readonly git: GitInfo;
+  readonly model: ModelInfo;
+  readonly context: ContextInfo;
+  readonly config?: Config;
+  readonly cost?: CostInfo;
+  readonly lines?: LinesChanged;
+  readonly duration?: SessionDuration;
+  readonly subagent?: SubagentInfo;
+
   constructor(
-    public readonly workDir: WorkDir,
-    public readonly git: GitInfo,
-    public readonly model: ModelInfo,
-    public readonly context: ContextInfo,
-    public readonly config?: Config,
-    public readonly cost?: CostInfo,
-    public readonly lines?: LinesChanged,
-    public readonly duration?: SessionDuration,
-    public readonly subagent?: SubagentInfo
-  ) {}
+    workDir: WorkDir,
+    git: GitInfo,
+    model: ModelInfo,
+    context: ContextInfo,
+    config?: Config,
+    cost?: CostInfo,
+    lines?: LinesChanged,
+    duration?: SessionDuration,
+    subagent?: SubagentInfo
+  ) {
+    this.workDir = workDir;
+    this.git = git;
+    this.model = model;
+    this.context = context;
+    this.config = config;
+    this.cost = cost;
+    this.lines = lines;
+    this.duration = duration;
+    this.subagent = subagent;
+  }
 
   render(): string {
     const animationOptions = {

@@ -8,10 +8,13 @@ import { Icons } from "../icons.ts";
 import { ANSI_COLORS } from "../types.ts";
 
 export class LinesChanged {
-  constructor(
-    public readonly linesAdded: number | null,
-    public readonly linesRemoved: number | null
-  ) {}
+  readonly linesAdded: number | null;
+  readonly linesRemoved: number | null;
+
+  constructor(linesAdded: number | null, linesRemoved: number | null) {
+    this.linesAdded = linesAdded;
+    this.linesRemoved = linesRemoved;
+  }
 
   render(): string {
     if (this.linesAdded === null && this.linesRemoved === null) {

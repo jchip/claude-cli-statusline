@@ -10,16 +10,26 @@ import { GitResolver } from "../logic/GitResolver.ts";
 export class GitInfo {
   private data: GitData;
   private statusIcons?: { clean: string; dirty: string; staged: string };
+  readonly repoName: string | null;
+  readonly branch: string | null;
+  readonly projectDirBasename: string;
+  readonly isClean: boolean | null;
+  readonly hasStaged: boolean | null;
 
   constructor(
-    public readonly repoName: string | null,
-    public readonly branch: string | null,
-    public readonly projectDirBasename: string,
+    repoName: string | null,
+    branch: string | null,
+    projectDirBasename: string,
     showGitRepoNameConfig: boolean = false,
-    public readonly isClean: boolean | null = null,
-    public readonly hasStaged: boolean | null = null,
+    isClean: boolean | null = null,
+    hasStaged: boolean | null = null,
     statusIcons?: { clean: string; dirty: string; staged: string }
   ) {
+    this.repoName = repoName;
+    this.branch = branch;
+    this.projectDirBasename = projectDirBasename;
+    this.isClean = isClean;
+    this.hasStaged = hasStaged;
     // Create data model
     this.data = new GitData(repoName, branch, projectDirBasename, showGitRepoNameConfig, isClean, hasStaged);
     this.statusIcons = statusIcons;

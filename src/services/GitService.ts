@@ -4,7 +4,7 @@
  * Optimized: single git call, find .git by traversing directories
  */
 
-import { spawnSync } from "bun";
+import { spawnSync } from "child_process";
 import { readFileSync, existsSync, statSync } from "fs";
 import { dirname, join } from "path";
 
@@ -120,11 +120,12 @@ export class GitService {
     try {
       // Single git call: --porcelain=v2 --branch gives us branch + status
       const result = spawnSync(
-        ["git", "-C", dir, "status", "--porcelain=v2", "--branch"],
+        "git",
+        ["-C", dir, "status", "--porcelain=v2", "--branch"],
         { timeout: 5000 }
       );
 
-      if (result.exitCode !== 0) {
+      if (result.status !== 0) {
         const statusResult: GitStatusResult = {
           branch: null,
           isClean: true,

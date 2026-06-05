@@ -10,17 +10,33 @@ import { ContextCalculator } from "../logic/ContextCalculator.ts";
 
 export class ContextInfo {
   private data: ContextData;
+  readonly usedTokens: number;
+  readonly maxTokens: number;
+  readonly compactBuffer: number;
+  readonly compactOccurred: boolean;
+  readonly thresholds: ColorThresholds;
+  readonly matchIndicator: string;
+  readonly autoCompactEnabled: boolean | null;
+  readonly exceeds200k: boolean;
 
   constructor(
-    public readonly usedTokens: number,
-    public readonly maxTokens: number,
-    public readonly compactBuffer: number,
-    public readonly compactOccurred: boolean,
-    public readonly thresholds: ColorThresholds,
-    public readonly matchIndicator: string = "",
-    public readonly autoCompactEnabled: boolean | null = null,
-    public readonly exceeds200k: boolean = false
+    usedTokens: number,
+    maxTokens: number,
+    compactBuffer: number,
+    compactOccurred: boolean,
+    thresholds: ColorThresholds,
+    matchIndicator: string = "",
+    autoCompactEnabled: boolean | null = null,
+    exceeds200k: boolean = false
   ) {
+    this.usedTokens = usedTokens;
+    this.maxTokens = maxTokens;
+    this.compactBuffer = compactBuffer;
+    this.compactOccurred = compactOccurred;
+    this.thresholds = thresholds;
+    this.matchIndicator = matchIndicator;
+    this.autoCompactEnabled = autoCompactEnabled;
+    this.exceeds200k = exceeds200k;
     // Create data model
     this.data = new ContextData(
       usedTokens,

@@ -9,12 +9,16 @@ import { formatProjectDir, computeRelativePath } from "../logic/PathFormatter.ts
 
 export class WorkDir {
   private data: WorkDirData;
+  readonly projectDir: string;
+  readonly currentDir: string;
 
   constructor(
-    public readonly projectDir: string,
-    public readonly currentDir: string,
+    projectDir: string,
+    currentDir: string,
     showFullDir: boolean = false
   ) {
+    this.projectDir = projectDir;
+    this.currentDir = currentDir;
     // Create data model with precomputed values
     this.data = new WorkDirData(
       projectDir,

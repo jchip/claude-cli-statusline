@@ -8,7 +8,11 @@ import { Icons } from "../icons.ts";
 import { ANSI_COLORS } from "../types.ts";
 
 export class SessionDuration {
-  constructor(public readonly durationMs: number | null) {}
+  readonly durationMs: number | null;
+
+  constructor(durationMs: number | null) {
+    this.durationMs = durationMs;
+  }
 
   render(): string {
     if (this.durationMs === null) {
