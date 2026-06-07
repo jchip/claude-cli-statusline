@@ -10,8 +10,11 @@ import { dirname, join } from "path";
 
 export interface GitStatusResult {
   branch: string | null;
-  isClean: boolean;
-  hasStaged: boolean;
+  // null = unknown (git command unavailable, errored, or timed out).
+  // We must NOT report `true` (clean) in that case — that produces a false
+  // "clean" indicator. null lets the renderer show no status marker instead.
+  isClean: boolean | null;
+  hasStaged: boolean | null;
   repoName: string | null;
   gitDir: string | null;
 }
@@ -118,18 +121,30 @@ export class GitService {
     const repoName = this.getRepoNameFromConfig(gitDir);
 
     try {
-      // Single git call: --porcelain=v2 --branch gives us branch + status
+      // Single git call: --porcelain=v2 --branch gives us branch + status.
+      //
+      // Run git WITH the repo as the working directory (cwd) instead of `-C
+      // <dir>`. This matters on WSL: a `git` wrapper on PATH that dispatches
+      // to native git.exe vs Linux git based on the *current directory* (to
+      // avoid the slow cross-filesystem penalty on /mnt/<drive> repos) only
+      // sees `cwd`/`$PWD`, not a `-C` argument. Running from inside the repo
+      // lets such a router pick the fast native git, and is equivalent to
+      // `-C dir` for plain git. PWD is set explicitly because the router reads
+      // it directly.
       const result = spawnSync(
         "git",
-        ["-C", dir, "status", "--porcelain=v2", "--branch"],
-        { timeout: 5000 }
+        ["status", "--porcelain=v2", "--branch"],
+        { cwd: dir, timeout: 5000, env: { ...process.env, PWD: dir } }
       );
 
+      // status === 0 means git answered. Anything else (non-zero exit, ENOENT
+      // when git is missing, or null status from a timeout/kill) means we do
+      // NOT know the working-tree state — report unknown (null), never clean.
       if (result.status !== 0) {
         const statusResult: GitStatusResult = {
           branch: null,
-          isClean: true,
-          hasStaged: false,
+          isClean: null,
+          hasStaged: null,
           repoName,
           gitDir,
         };
@@ -193,10 +208,11 @@ export class GitService {
       gitStatusCache.set(dir, statusResult);
       return statusResult;
     } catch {
+      // Spawn threw (e.g. cwd missing) — working-tree state is unknown.
       const statusResult: GitStatusResult = {
         branch: null,
-        isClean: true,
-        hasStaged: false,
+        isClean: null,
+        hasStaged: null,
         repoName,
         gitDir,
       };
