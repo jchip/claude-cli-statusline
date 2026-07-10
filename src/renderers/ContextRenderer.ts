@@ -7,7 +7,6 @@ import { ContextData } from "../models/ContextData.ts";
 import { ContextCalculator } from "../logic/ContextCalculator.ts";
 import { ANSI_COLORS, type ColorThresholds } from "../types.ts";
 import { Icons } from "../icons.ts";
-import { spinner } from "../logic/AnimationUtils.ts";
 
 export interface ContextRenderOptions {
   animated?: boolean;
@@ -65,11 +64,6 @@ export class ContextRenderer {
 
     if (data.matchIndicator) {
       parts.push(data.matchIndicator);
-    }
-
-    // Add spinner after max context window if animated
-    if (options.animated) {
-      parts.push(spinner(options.spinnerStyle || "transportation"));
     }
 
     return parts.join("");

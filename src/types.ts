@@ -137,11 +137,12 @@ export const ANSI_COLORS = {
 } as const;
 
 export const PREDEFINED_LAYOUTS = {
-  // Named layouts
-  "normal": ["project cwd git model context subagent"],
-  "extend": ["project cwd git model context subagent cost duration"],
-  "full": ["project cwd git model context subagent cost lines duration"],
+  // Named layouts (spinner trails so the animated glyph has no volatile fields
+  // to its right; it's a no-op when animations are disabled)
+  "normal": ["project cwd git model context subagent spinner"],
+  "extend": ["project cwd git model context subagent cost duration spinner"],
+  "full": ["project cwd git model context subagent cost lines duration spinner"],
   // Legacy names (backward compatibility)
-  "layout-1-line": ["project cwd git model context subagent"],
-  "layout-2-line": ["project cwd", "git model context subagent"],
+  "layout-1-line": ["project cwd git model context subagent spinner"],
+  "layout-2-line": ["project cwd", "git model context subagent spinner"],
 } as const;

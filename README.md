@@ -324,6 +324,7 @@ The statusline displays information through widgets that can be arranged using l
 | `cost` | 💵 | Total session cost in USD (cumulative across context resets) |
 | `lines` | 📝 | Lines added/removed during session (vanity metric, doesn't reset with context) |
 | `duration` | ⏱️ | Total session duration in hours/minutes (cumulative across context resets) |
+| `spinner` | 🚗 | Animated activity spinner (only when `animations.enabled` is true); place it last so the animated glyph has no volatile fields to its right |
 
 **Note on metrics:**
 - **Actionable**: `git` status tells you if you need to commit changes, `subagent` shows which specialist is handling the task
@@ -555,15 +556,17 @@ Controls the layout and ordering of statusline components. You can use predefine
 **Default:** `"extend"` (single line with cost and duration)
 
 **Predefined Layouts:**
-- `"normal"` - Basic info only: `["project cwd git model context subagent"]`
-- `"extend"` - Adds cost & duration: `["project cwd git model context subagent cost duration"]` (default)
-- `"full"` - Everything including lines: `["project cwd git model context subagent cost lines duration"]`
+- `"normal"` - Basic info only: `["project cwd git model context subagent spinner"]`
+- `"extend"` - Adds cost & duration: `["project cwd git model context subagent cost duration spinner"]` (default)
+- `"full"` - Everything including lines: `["project cwd git model context subagent cost lines duration spinner"]`
 - `"layout-1-line"` - Legacy alias for `normal`
-- `"layout-2-line"` - Two lines: `["project cwd", "git model context subagent"]`
+- `"layout-2-line"` - Two lines: `["project cwd", "git model context subagent spinner"]`
+
+The trailing `spinner` token renders only when `animations.enabled` is true; otherwise it is omitted.
 
 **Available widgets for custom layouts:**
 
-You can use any combination of: `project`, `cwd`, `git`, `model`, `context`, `subagent`, `cost`, `lines`, `duration`
+You can use any combination of: `project`, `cwd`, `git`, `model`, `context`, `subagent`, `cost`, `lines`, `duration`, `spinner`
 
 See the [Available Widgets](#available-widgets) section for details on what each widget displays.
 

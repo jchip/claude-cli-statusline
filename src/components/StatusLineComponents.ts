@@ -13,6 +13,7 @@ import type { SubagentInfo } from "./SubagentInfo.ts";
 import type { Config } from "../types.ts";
 import { PREDEFINED_LAYOUTS } from "../types.ts";
 import { wrapBalanced } from "../logic/LayoutWrapper.ts";
+import { spinner } from "../logic/AnimationUtils.ts";
 
 export class StatusLineComponents {
   readonly workDir: WorkDir;
@@ -48,10 +49,14 @@ export class StatusLineComponents {
   }
 
   render(): string {
-    const animationOptions = {
-      animated: this.config?.animations?.enabled ?? false,
-      spinnerStyle: this.config?.animations?.spinner,
-    };
+    // The spinner is a standalone component so its position is controlled by
+    // the layout. Keeping it at the trailing edge avoids animating a wide glyph
+    // upstream of volatile fields (cost/duration), which causes column drift and
+    // stale-cell redraw artifacts under tmux.
+    const animated = this.config?.animations?.enabled ?? false;
+    const spinnerStr = animated
+      ? spinner(this.config?.animations?.spinner ?? "transportation")
+      : "";
 
     // Component map for flexible rendering
     const componentMap: Record<string, string> = {
@@ -59,11 +64,12 @@ export class StatusLineComponents {
       cwd: this.workDir.renderCwd(),
       git: this.git.render(),
       model: this.model.render(),
-      context: this.context.render(animationOptions),
+      context: this.context.render(),
       cost: this.cost?.render() ?? "",
       lines: this.lines?.render() ?? "",
       duration: this.duration?.render() ?? "",
       subagent: this.subagent?.render() ?? "",
+      spinner: spinnerStr,
     };
 
     // Resolve layout (predefined or custom)
