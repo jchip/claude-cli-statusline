@@ -52,7 +52,36 @@ describe("SubagentInfo", () => {
     expect(output).toBe("");
   });
 
-  test("fromInput creates SubagentInfo from input with subagent_type", () => {
+  test("fromInput creates SubagentInfo from input with agent_type", () => {
+    const input: StatusLineInput = {
+      agent_type: "code-reviewer",
+    };
+
+    const subagent = SubagentInfo.fromInput(input);
+
+    expect(subagent.subagentType).toBe("code-reviewer");
+  });
+
+  test("fromInput falls back to agent.name", () => {
+    const input: StatusLineInput = {
+      agent: { name: "explore" },
+    };
+
+    const subagent = SubagentInfo.fromInput(input);
+
+    expect(subagent.subagentType).toBe("explore");
+  });
+
+  test("fromInput prefers agent_type over agent.name", () => {
+    const input: StatusLineInput = {
+      agent_type: "code-reviewer",
+      agent: { name: "explore" },
+    };
+
+    expect(SubagentInfo.fromInput(input).subagentType).toBe("code-reviewer");
+  });
+
+  test("fromInput falls back to the legacy subagent_type key", () => {
     const input: StatusLineInput = {
       subagent_type: "code-reviewer",
     };
@@ -62,7 +91,7 @@ describe("SubagentInfo", () => {
     expect(subagent.subagentType).toBe("code-reviewer");
   });
 
-  test("fromInput creates SubagentInfo from input without subagent_type", () => {
+  test("fromInput creates SubagentInfo from input without an agent", () => {
     const input: StatusLineInput = {};
 
     const subagent = SubagentInfo.fromInput(input);
@@ -70,8 +99,10 @@ describe("SubagentInfo", () => {
     expect(subagent.subagentType).toBeNull();
   });
 
-  test("fromInput handles undefined subagent_type", () => {
+  test("fromInput handles undefined agent fields", () => {
     const input: StatusLineInput = {
+      agent_type: undefined,
+      agent: { name: undefined },
       subagent_type: undefined,
     };
 

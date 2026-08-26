@@ -34,8 +34,14 @@ export class SubagentInfo {
       .join("-");
   }
 
+  /**
+   * The CLI sends the main-thread agent type as `agent_type`, mirrored as
+   * `agent.name`. `subagent_type` is never sent (it is the Agent tool's
+   * parameter name) and is kept only as a defensive fallback.
+   */
   static fromInput(input: StatusLineInput): SubagentInfo {
-    const subagentType = input.subagent_type ?? null;
+    const subagentType =
+      input.agent_type ?? input.agent?.name ?? input.subagent_type ?? null;
     return new SubagentInfo(subagentType);
   }
 }
