@@ -32,10 +32,27 @@ export interface Config {
   "clear-model"?: boolean;
 }
 
+/**
+ * The JSON the Claude CLI pipes to the statusline command.
+ *
+ * Field inventory verified against the payload builder in CLI v2.1.239.
+ * Fields marked "conditional" are omitted entirely when they don't apply, so
+ * every one of them must be treated as optional.
+ */
 export interface StatusLineInput {
   session_id?: string;
   transcript_path?: string;
   cwd?: string;
+  /** Conditional: id of the prompt currently being answered */
+  prompt_id?: string;
+  /** Conditional: main-thread agent type (also mirrored in `agent.name`) */
+  agent_type?: string;
+  /** Conditional: same value as `agent_type` */
+  agent?: {
+    name?: string;
+  };
+  /** Conditional: session title/name when one is set */
+  session_name?: string;
   model?: {
     id?: string;
     display_name?: string;
@@ -43,6 +60,20 @@ export interface StatusLineInput {
   workspace?: {
     current_dir?: string;
     project_dir?: string;
+    added_dirs?: string[];
+    /** Conditional: path of the git worktree, when in one */
+    git_worktree?: string;
+    /** Conditional: present when the git remote resolves */
+    repo?: {
+      host?: string;
+      owner?: string;
+      name?: string;
+    };
+  };
+  /** CLI version string, e.g. "2.1.239" */
+  version?: string;
+  output_style?: {
+    name?: string;
   };
   gitBranch?: string;
   budget?: Record<string, unknown>;
@@ -53,9 +84,24 @@ export interface StatusLineInput {
     total_lines_added?: number;
     total_lines_removed?: number;
   };
+  /**
+   * Legacy/never-sent: kept only as a fallback source for the agent name.
+   * The CLI sends `agent_type` / `agent.name` instead.
+   */
   subagent_type?: string;
   exceeds_200k_tokens?: boolean;
+  fast_mode?: boolean;
+  /** Conditional: only for models that support effort levels */
+  effort?: {
+    level?: string;
+  };
+  thinking?: {
+    enabled?: boolean;
+  };
   context_window?: {
+    /** Cumulative session totals, not the current context size */
+    total_input_tokens?: number;
+    total_output_tokens?: number;
     context_window_size?: number;
     current_usage?: {
       input_tokens?: number;
@@ -66,7 +112,42 @@ export interface StatusLineInput {
     used_percentage?: number;
     remaining_percentage?: number;
   };
+  /** Conditional: present once rate limits have been observed */
+  rate_limits?: {
+    five_hour?: RateLimitWindow;
+    seven_day?: RateLimitWindow;
+  };
+  /** Conditional: vim mode enabled */
+  vim?: {
+    mode?: string;
+  };
+  /** Conditional: remote/cloud session */
+  remote?: {
+    session_id?: string;
+  };
+  /** Conditional: PR context */
+  pr?: {
+    number?: number;
+    url?: string;
+    review_state?: string;
+    kind?: string;
+  };
+  /** Conditional: inside a worktree session */
+  worktree?: {
+    name?: string;
+    path?: string;
+    branch?: string;
+    original_cwd?: string;
+    original_branch?: string;
+  };
   [key: string]: unknown;
+}
+
+export interface RateLimitWindow {
+  /** 0-100 */
+  used_percentage?: number;
+  /** Epoch SECONDS */
+  resets_at?: number;
 }
 
 export interface SessionCacheEntry {

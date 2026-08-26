@@ -1,0 +1,63 @@
+{
+  "session_id": "985aca1c-bdac-4583-857a-f0fcbd51974b",
+  "transcript_path": ".../985aca1c-bdac-4583-857a-f0fcbd51974b.jsonl",
+  "cwd": "",
+  "prompt_id": "cd0a746c-79b5-4fc7-9ab1-0db92847182f",
+  "effort": {
+    "level": "high"
+  },
+  "session_name": "Claude CLI statusline JSON fields",
+  "model": {
+    "id": "claude-opus-5[1m]",
+    "display_name": "Opus 5 (1M context)"
+  },
+  "workspace": {
+    "current_dir": "",
+    "project_dir": "",
+    "added_dirs": [],
+    "repo": {
+      "host": "github.com",
+      "owner": "jchip",
+      "name": "claude-cli-statusline"
+    }
+  },
+  "version": "2.1.239",
+  "output_style": {
+    "name": "default"
+  },
+  "cost": {
+    "total_cost_usd": 5.6563675,
+    "total_duration_ms": 1244858,
+    "total_api_duration_ms": 582683,
+    "total_lines_added": 0,
+    "total_lines_removed": 0
+  },
+  "context_window": {
+    "total_input_tokens": 146322,
+    "total_output_tokens": 211,
+    "context_window_size": 1000000,
+    "current_usage": {
+      "input_tokens": 2,
+      "output_tokens": 211,
+      "cache_creation_input_tokens": 210,
+      "cache_read_input_tokens": 146110
+    },
+    "used_percentage": 15,
+    "remaining_percentage": 85
+  },
+  "exceeds_200k_tokens": false,
+  "fast_mode": false,
+  "thinking": {
+    "enabled": true
+  },
+  "rate_limits": {
+    "five_hour": {
+      "used_percentage": 6,
+      "resets_at": 1787788800
+    },
+    "seven_day": {
+      "used_percentage": 19,
+      "resets_at": 1788087600
+    }
+  }
+}
