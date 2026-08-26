@@ -90,8 +90,9 @@ Or with a custom config file:
   - 🛠️ Dirty working tree (🟡 yellow) - has uncommitted changes
   - 📤 Staged changes (🔵 light blue) - changes ready to commit
   - With `show-git-repo-name: true` in config:
-    - `🐙💎 📦` when repo name matches directory name
-    - `🐙💎 repo-name` when repo name differs from directory name
+    - `🐙💎 owner/repo-name` when the Claude CLI reports the remote (`workspace.repo`)
+    - `🐙💎 📦` when the git-derived repo name matches the directory name
+    - `🐙💎 repo-name` when the git-derived repo name differs from the directory name
   - Git repo name is extracted from remote URL (e.g., `git@github.com:user/my-repo.git` → `my-repo`)
 - ⎇ Git branch (🟢 green if in repo, 🟡 yellow if no repo)
   - ∅ No git repository
@@ -321,6 +322,8 @@ The statusline displays information through widgets that can be arranged using l
 | `model` | 🧠 | AI model name (e.g., "Sonnet 4.5") |
 | `context` | ⏬ | Context usage (remaining % before full/compact, max tokens) |
 | `subagent` | 🔍 | Currently active sub-agent (e.g., "Code-Reviewer", "Explore") |
+| `mode` | 🎚️ | Run modes: effort level, thinking (💭), fast mode (💨) — opt-in, not in the built-in layouts |
+| `session` | 🌳/🔀/📌 | Session identity: worktree name, PR number, or session name — opt-in, not in the built-in layouts |
 | `cost` | 💵 | Total session cost in USD (cumulative across context resets) |
 | `lines` | 📝 | Lines added/removed during session (vanity metric, doesn't reset with context) |
 | `duration` | ⏱️ | Total session duration in hours/minutes (cumulative across context resets) |
@@ -328,6 +331,7 @@ The statusline displays information through widgets that can be arranged using l
 
 **Note on metrics:**
 - **Actionable**: `git` status tells you if you need to commit changes, `subagent` shows which specialist is handling the task
+- **Disambiguating**: `session` tells apart multiple windows in the same project (worktree / PR / session name), `mode` shows the effort and thinking settings in effect
 - **Informational**: `context` shows when compaction will occur
 - **Vanity metrics**: `cost`, `lines`, and `duration` are cumulative session stats that don't reset with `/clear`
 
@@ -480,9 +484,12 @@ When `true`:
 - Shows `🐙 repo-name ⎇ branch` if repo name differs from directory name
 
 **Git repo name detection:**
-- First tries to extract from remote URL: `git remote get-url origin`
+- First uses `workspace.repo` from the Claude CLI input when present, rendered as `owner/name` (e.g. `jchip/claude-cli-statusline`)
+- Otherwise extracts from remote URL: `git remote get-url origin`
 - For example: `git@github.com:user/my-repo.git` → `my-repo`
 - Falls back to directory basename if no remote is configured
+
+Because `owner/name` never matches the directory basename, the 📦 shorthand only appears when falling back to the git-derived name.
 
 **Example:**
 
@@ -566,7 +573,9 @@ The trailing `spinner` token renders only when `animations.enabled` is true; oth
 
 **Available widgets for custom layouts:**
 
-You can use any combination of: `project`, `cwd`, `git`, `model`, `context`, `subagent`, `cost`, `lines`, `duration`, `spinner`
+You can use any combination of: `project`, `cwd`, `git`, `model`, `context`, `subagent`, `mode`, `session`, `cost`, `lines`, `duration`, `spinner`
+
+`mode` and `session` are not part of any built-in layout — add them to a custom layout to use them.
 
 See the [Available Widgets](#available-widgets) section for details on what each widget displays.
 

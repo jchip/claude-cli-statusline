@@ -10,6 +10,8 @@ import type { CostInfo } from "./CostInfo.ts";
 import type { LinesChanged } from "./LinesChanged.ts";
 import type { SessionDuration } from "./SessionDuration.ts";
 import type { SubagentInfo } from "./SubagentInfo.ts";
+import type { ModeInfo } from "./ModeInfo.ts";
+import type { SessionInfo } from "./SessionInfo.ts";
 import type { Config } from "../types.ts";
 import { PREDEFINED_LAYOUTS } from "../types.ts";
 import { wrapBalanced } from "../logic/LayoutWrapper.ts";
@@ -25,6 +27,8 @@ export class StatusLineComponents {
   readonly lines?: LinesChanged;
   readonly duration?: SessionDuration;
   readonly subagent?: SubagentInfo;
+  readonly mode?: ModeInfo;
+  readonly session?: SessionInfo;
 
   constructor(
     workDir: WorkDir,
@@ -35,7 +39,9 @@ export class StatusLineComponents {
     cost?: CostInfo,
     lines?: LinesChanged,
     duration?: SessionDuration,
-    subagent?: SubagentInfo
+    subagent?: SubagentInfo,
+    mode?: ModeInfo,
+    session?: SessionInfo
   ) {
     this.workDir = workDir;
     this.git = git;
@@ -46,6 +52,8 @@ export class StatusLineComponents {
     this.lines = lines;
     this.duration = duration;
     this.subagent = subagent;
+    this.mode = mode;
+    this.session = session;
   }
 
   render(): string {
@@ -69,6 +77,8 @@ export class StatusLineComponents {
       lines: this.lines?.render() ?? "",
       duration: this.duration?.render() ?? "",
       subagent: this.subagent?.render() ?? "",
+      mode: this.mode?.render() ?? "",
+      session: this.session?.render() ?? "",
       spinner: spinnerStr,
     };
 

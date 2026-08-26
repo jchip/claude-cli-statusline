@@ -25,4 +25,10 @@ export class Icons {
   static readonly LINES = "📝";
   static readonly DURATION = "⏱️";
   static readonly SUBAGENT = "🔍";
+  static readonly EFFORT = "🎚️";
+  static readonly THINKING = "💭";
+  static readonly FAST_MODE = "💨";
+  static readonly WORKTREE = "🌳";
+  static readonly PULL_REQUEST = "🔀";
+  static readonly SESSION = "📌";
 }
