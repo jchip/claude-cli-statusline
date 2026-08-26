@@ -52,7 +52,7 @@ export class GitRenderer {
 
     if (data.showRepoName) {
       // Show repo name when different from project dir (config enabled)
-      parts.push(data.repoName!);
+      parts.push(data.displayName!);
     } else if (data.showPackageIcon) {
       // Repo name same as project dir (config enabled)
       parts.push(Icons.WORKDIR);

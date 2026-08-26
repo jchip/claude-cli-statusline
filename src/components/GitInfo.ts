@@ -15,6 +15,7 @@ export class GitInfo {
   readonly projectDirBasename: string;
   readonly isClean: boolean | null;
   readonly hasStaged: boolean | null;
+  readonly repoDisplayName: string | null;
 
   constructor(
     repoName: string | null,
@@ -23,15 +24,25 @@ export class GitInfo {
     showGitRepoNameConfig: boolean = false,
     isClean: boolean | null = null,
     hasStaged: boolean | null = null,
-    statusIcons?: { clean: string; dirty: string; staged: string }
+    statusIcons?: { clean: string; dirty: string; staged: string },
+    repoDisplayName: string | null = null
   ) {
     this.repoName = repoName;
     this.branch = branch;
     this.projectDirBasename = projectDirBasename;
     this.isClean = isClean;
     this.hasStaged = hasStaged;
+    this.repoDisplayName = repoDisplayName;
     // Create data model
-    this.data = new GitData(repoName, branch, projectDirBasename, showGitRepoNameConfig, isClean, hasStaged);
+    this.data = new GitData(
+      repoName,
+      branch,
+      projectDirBasename,
+      showGitRepoNameConfig,
+      isClean,
+      hasStaged,
+      repoDisplayName
+    );
     this.statusIcons = statusIcons;
   }
 
@@ -48,6 +59,20 @@ export class GitInfo {
     return GitRenderer.render(this.data, this.statusIcons);
   }
 
+  /**
+   * The CLI reports the resolved remote as `workspace.repo`. Prefer the
+   * unambiguous "owner/name" form over the directory-derived repo name.
+   */
+  private static repoDisplayName(repo?: {
+    owner?: string;
+    name?: string;
+  }): string | null {
+    if (repo?.owner && repo?.name) {
+      return `${repo.owner}/${repo.name}`;
+    }
+    return repo?.name ?? null;
+  }
+
   static fromDirectory(
     dir: string,
     transcriptPath?: string,
@@ -55,7 +80,8 @@ export class GitInfo {
     cachedBranch?: string | null,
     inputGitBranch?: string,
     showGitRepoNameConfig: boolean = false,
-    statusIcons?: { clean: string; dirty: string; staged: string }
+    statusIcons?: { clean: string; dirty: string; staged: string },
+    inputRepo?: { owner?: string; name?: string }
   ): GitInfo {
     // Single unified resolution - one git call max
     const resolved = GitResolver.resolve(
@@ -73,7 +99,8 @@ export class GitInfo {
       showGitRepoNameConfig,
       resolved.isClean,
       resolved.hasStaged,
-      statusIcons
+      statusIcons,
+      GitInfo.repoDisplayName(inputRepo)
     );
   }
 }

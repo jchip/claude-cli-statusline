@@ -50,6 +50,61 @@ describe("GitInfo", () => {
     expect(git.showRepoName).toBe(false);
   });
 
+  test("renders the owner/name form from workspace.repo when provided", () => {
+    const git = new GitInfo(
+      "claude-cli-statusline",
+      "main",
+      "claude-cli-statusline",
+      true,
+      true,
+      false,
+      undefined,
+      "jchip/claude-cli-statusline"
+    );
+
+    expect(git.repoDisplayName).toBe("jchip/claude-cli-statusline");
+    expect(git.showRepoName).toBe(true);
+    expect(git.render()).toContain("jchip/claude-cli-statusline");
+  });
+
+  test("keeps repoName untouched so the cache stores the plain repo name", () => {
+    const git = new GitInfo(
+      "claude-cli-statusline",
+      "main",
+      "claude-cli-statusline",
+      true,
+      true,
+      false,
+      undefined,
+      "jchip/claude-cli-statusline"
+    );
+
+    expect(git.repoName).toBe("claude-cli-statusline");
+  });
+
+  test("falls back to the resolved repo name when no display name is given", () => {
+    const git = new GitInfo("my-lib", "main", "project", true);
+
+    expect(git.repoDisplayName).toBeNull();
+    expect(git.render()).toContain("my-lib");
+  });
+
+  test("does not render a repo display name when the config is disabled", () => {
+    const git = new GitInfo(
+      "claude-cli-statusline",
+      "main",
+      "project",
+      false,
+      true,
+      false,
+      undefined,
+      "jchip/claude-cli-statusline"
+    );
+
+    expect(git.showRepoName).toBe(false);
+    expect(git.render()).not.toContain("jchip");
+  });
+
   test("renders with no git repo", () => {
     const git = new GitInfo(null, null, "project");
     const output = git.render();
