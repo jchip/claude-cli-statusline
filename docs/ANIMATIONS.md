@@ -9,7 +9,7 @@ Replaces the static ⏬ icon with an animated braille spinner that rotates smoot
 
 **Example:**
 ```
-⠸ 75%✦52%⚡️200K
+⠸ 75%✦52%📖200K
 ```
 
 The spinner animates automatically whenever Claude CLI updates the statusline.
@@ -25,7 +25,7 @@ Shows the direction of context usage change compared to the previous update.
 
 **Example:**
 ```
-⏬ 75%✦52%⚡️200K ↗
+⏬ 75%✦52%📖200K ↗
 ```
 
 ### 3. Sparkline
@@ -33,7 +33,7 @@ Displays a mini bar chart of recent context usage (last 8 data points).
 
 **Example:**
 ```
-⏬ 75%✦52%⚡️200K ↗▂▄▅▆█
+⏬ 75%✦52%📖200K ↗▂▄▅▆█
 ```
 
 The sparkline provides at-a-glance trend visualization without cluttering the display.
@@ -114,27 +114,27 @@ State is automatically managed and requires no user intervention. It persists ac
 
 ### Static (default)
 ```
-⏬ 75%✦52%⚡️200K
+⏬ 75%✦52%📖200K
 ```
 
 ### With spinner only
 ```
-⠸ 75%✦52%⚡️200K
+⠸ 75%✦52%📖200K
 ```
 
 ### With trend arrow
 ```
-⏬ 75%✦52%⚡️200K ↗
+⏬ 75%✦52%📖200K ↗
 ```
 
 ### With sparkline
 ```
-⏬ 75%✦52%⚡️200K ▂▄▅▆█
+⏬ 75%✦52%📖200K ▂▄▅▆█
 ```
 
 ### Full animation suite
 ```
-⠸ 75%✦52%⚡️200K ↗▂▄▅▆█
+⠸ 75%✦52%📖200K ↗▂▄▅▆█
 ```
 
 ## Performance

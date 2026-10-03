@@ -24,7 +24,7 @@ describe("AnimationUtils", () => {
     expect(moonFrames).toContain(moonFrame);
 
     const heartFrame = spinner("hearts");
-    const heartFrames = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"];
+    const heartFrames = ["💖", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"];
     expect(heartFrames).toContain(heartFrame);
   });
 

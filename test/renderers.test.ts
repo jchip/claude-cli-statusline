@@ -18,17 +18,17 @@ describe("ContextRenderer", () => {
     expect(output).toContain("⏬");
     expect(output).toContain("75%");
     expect(output).toContain("✦");
-    expect(output).toContain("⚡️");
+    expect(output).toContain("📖");
     expect(output).toContain("200");
     expect(output).toContain("K");
   });
 
   test("renders context with match indicator", () => {
-    const data = new ContextData(50000, 200000, 45000, false, "🏷️");
+    const data = new ContextData(50000, 200000, 45000, false, "🔖");
     const thresholds = { green: 65, yellow: 45, orange: 20 };
     const output = ContextRenderer.render(data, thresholds);
 
-    expect(output).toContain("🏷️");
+    expect(output).toContain("🔖");
   });
 
   test("renders context with compacted icon", () => {
@@ -91,7 +91,7 @@ describe("GitRenderer", () => {
     const data = new GitData("project", "main", "project", false, false);
     const output = GitRenderer.render(data);
 
-    expect(output).toContain("🛠️");
+    expect(output).toContain("🚧");
     expect(output).toContain("\x1b[33m"); // Yellow color
   });
 
@@ -117,7 +117,7 @@ describe("GitRenderer", () => {
     const output = GitRenderer.render(data);
 
     expect(output).toContain("📤"); // Staged icon
-    expect(output).toContain("🛠️"); // Dirty icon
+    expect(output).toContain("🚧"); // Dirty icon
     expect(output).toContain("\x1b[36m"); // Light blue color for staged
     expect(output).toContain("\x1b[33m"); // Yellow color for dirty
   });
@@ -128,7 +128,7 @@ describe("GitRenderer", () => {
 
     expect(output).toContain("📤"); // Staged icon
     expect(output).not.toContain("💎"); // No clean icon
-    expect(output).not.toContain("🛠️"); // No dirty icon
+    expect(output).not.toContain("🚧"); // No dirty icon
   });
 });
 

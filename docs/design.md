@@ -36,13 +36,13 @@
   - ⎇ - Git branch (icon green)
   - 🧠 - Model Display name
   - ✦ - separator between two context percent
-  - ⚡️ - separator between second percent and model max tokens window, in K (thousands) or M (Million)
+  - 📖 - separator between second percent and model max tokens window, in K (thousands) or M (Million)
   - 💫 - if context was compacted (auto or manual)
-  - ⚙️ - follow the max token if it was retrieved from default config value
-  - 🏷️ - follow the max token if it was retrieved from display name config value
+  - 🔧 - follow the max token if it was retrieved from default config value
+  - 🔖 - follow the max token if it was retrieved from display name config value
 
 - Sample display:
-  `📦 ~/dev/claude-cli-statusline › 📁 . 🐙 📦 ⎇ main 🧠 Sonnet 4.5 ⏬ 75%✦52%⚡️200K`
+  `📦 ~/dev/claude-cli-statusline › 📁 . 🐙 📦 ⎇ main 🧠 Sonnet 4.5 ⏬ 75%✦52%📖200K`
 
 ## Architecture
 

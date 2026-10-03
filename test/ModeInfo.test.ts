@@ -10,7 +10,7 @@ describe("ModeInfo", () => {
   test("renders effort level with icon and color", () => {
     const output = new ModeInfo("high").render();
 
-    expect(output).toContain("🎚️");
+    expect(output).toContain("💪");
     expect(output).toContain("high");
     expect(output).toContain("\x1b[36m");
     expect(output).toContain("\x1b[0m");

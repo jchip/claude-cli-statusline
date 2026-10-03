@@ -47,7 +47,7 @@ export class ConfigLoader {
         "render-layout": "extend",
         "git-status-icons": {
           clean: "💎",
-          dirty: "🛠️",
+          dirty: "🚧",
           staged: "📤",
         },
         "clear-model": true,

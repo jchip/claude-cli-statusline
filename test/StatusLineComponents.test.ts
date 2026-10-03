@@ -49,7 +49,7 @@ describe("StatusLineComponents", () => {
     expect(output).toContain("⏬"); // Context icon
     expect(output).toContain("75%"); // Remaining percent
     expect(output).toContain("✦"); // Separator
-    expect(output).toContain("⚡️"); // Not compacted
+    expect(output).toContain("📖"); // Not compacted
     expect(output).toContain("200"); // Max tokens
     expect(output).toContain("K"); // Max tokens suffix
   });
@@ -80,7 +80,7 @@ describe("StatusLineComponents", () => {
       45000,
       false,
       { green: 65, yellow: 45, orange: 20 },
-      "🏷️"
+      "🔖"
     );
 
     const components = new StatusLineComponents(workDir, git, model, context);
@@ -88,7 +88,7 @@ describe("StatusLineComponents", () => {
 
     expect(output).toContain("1"); // 1M tokens
     expect(output).toContain("M"); // 1M tokens suffix
-    expect(output).toContain("🏷️"); // Display name indicator
+    expect(output).toContain("🔖"); // Display name indicator
   });
 
   test("renders with default window indicator", () => {
@@ -101,13 +101,13 @@ describe("StatusLineComponents", () => {
       45000,
       false,
       { green: 65, yellow: 45, orange: 20 },
-      "⚙️"
+      "🔧"
     );
 
     const components = new StatusLineComponents(workDir, git, model, context);
     const output = components.render();
 
-    expect(output).toContain("⚙️"); // Default indicator
+    expect(output).toContain("🔧"); // Default indicator
   });
 
   test("renders with no git repo", () => {

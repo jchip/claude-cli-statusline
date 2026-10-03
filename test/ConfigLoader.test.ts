@@ -233,7 +233,7 @@ describe("ConfigLoader", () => {
 
     // Check git-status-icons deep merge
     expect(config["git-status-icons"].clean).toBe("✨"); // User override
-    expect(config["git-status-icons"].dirty).toBe("🛠️"); // From default
+    expect(config["git-status-icons"].dirty).toBe("🚧"); // From default
     expect(config["git-status-icons"].staged).toBe("📤"); // From default
   });
 

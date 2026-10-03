@@ -50,7 +50,7 @@ async function main() {
 
   // If parse error, output fallback statusline and exit
   if (parseError) {
-    process.stdout.write(`⚠️ statusline: ${parseError}`);
+    process.stdout.write(`❗ statusline: ${parseError}`);
     return;
   }
 
@@ -196,6 +196,6 @@ async function main() {
 
 main().catch((error) => {
   const msg = error instanceof Error ? error.message : String(error);
-  process.stdout.write(`⚠️ statusline error: ${msg}`);
+  process.stdout.write(`❗ statusline error: ${msg}`);
   process.exit(1);
 });

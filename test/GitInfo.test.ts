@@ -133,7 +133,7 @@ describe("GitInfo", () => {
   test("renders with dirty working tree status", () => {
     const git = new GitInfo("project", "main", "project", false, false);
     const output = git.render();
-    expect(output).toContain("🛠️");
+    expect(output).toContain("🚧");
     expect(output).toContain("\x1b[33m"); // Yellow color
   });
 
@@ -155,7 +155,7 @@ describe("GitInfo", () => {
     const git = new GitInfo("project", "main", "project", false, false, true);
     const output = git.render();
     expect(output).toContain("📤"); // Staged icon
-    expect(output).toContain("🛠️"); // Dirty icon
+    expect(output).toContain("🚧"); // Dirty icon
   });
 
   test("renders with repo name same as project dir and config enabled", () => {

@@ -39,14 +39,14 @@ describe("ModelInfo", () => {
     expect(model.matchIndicator).toBe("");
   });
 
-  test("shows 🏷️ indicator for display name match", () => {
+  test("shows 🔖 indicator for display name match", () => {
     const model = new ModelInfo("test-id", "Test", "Test", 200000, ModelMatchTypeEnum.DisplayName);
-    expect(model.matchIndicator).toBe("🏷️");
+    expect(model.matchIndicator).toBe("🔖");
   });
 
-  test("shows ⚙️ indicator for default match", () => {
+  test("shows 🔧 indicator for default match", () => {
     const model = new ModelInfo("test-id", "Test", "Test", 200000, ModelMatchTypeEnum.Default);
-    expect(model.matchIndicator).toBe("⚙️");
+    expect(model.matchIndicator).toBe("🔧");
   });
 
   test("renders with model display name", () => {

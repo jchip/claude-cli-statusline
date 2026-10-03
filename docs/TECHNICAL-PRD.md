@@ -79,7 +79,7 @@ Claude CLI Statusline is a TypeScript-based statusline extension for Claude CLI 
 ┌─────────────────────────────────────────────────────────────┐
 │                    Console Output (stdout)                  │
 │  📦 ~/project › 📁 src 🐙 📦 ⎇ main 🧠 Sonnet 4.5         │
-│  ⏬ 89%✦67%⚡️200K                                          │
+│  ⏬ 89%✦67%📖200K                                          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -255,8 +255,8 @@ interface Config {
 **Indicators**:
 
 - No indicator: Matched by model ID
-- 🏷️: Matched by display name
-- ⚙️: Using default value
+- 🔖: Matched by display name
+- 🔧: Using default value
 
 ### 3.4 Git Integration
 
@@ -304,7 +304,7 @@ Extract: Last path component from toplevel
 **Example Output**:
 
 ```
-📦 ~/dev/project › 📁 src/components 🐙 📦 ⎇ main 🧠 Sonnet 4.5 ⏬ 89%✦67%⚡️200K
+📦 ~/dev/project › 📁 src/components 🐙 📦 ⎇ main 🧠 Sonnet 4.5 ⏬ 89%✦67%📖200K
 ```
 
 #### 3.5.2 Icon Legend
@@ -318,10 +318,10 @@ Extract: Last path component from toplevel
 | 🧠   | AI Model                   | `model.display_name`     |
 | ⏬   | Context usage              | Calculated               |
 | ✦    | Separator                  | Static                   |
-| ⚡️  | Not compacted              | Dynamic                  |
+| 📖  | Not compacted              | Dynamic                  |
 | 💫   | Compacted                  | Dynamic                  |
-| 🏷️   | Display name match         | Config lookup            |
-| ⚙️   | Default window             | Config fallback          |
+| 🔖   | Display name match         | Config lookup            |
+| 🔧   | Default window             | Config fallback          |
 
 #### 3.5.3 Path Abbreviation (`src/utils.ts:5-8`)
 
@@ -884,7 +884,7 @@ bun tools/analyze-compact.ts <transcript-path>
 1. Check model ID in saved sample
 2. Verify model in `model-context-windows` config
 3. Delete cache file to force re-parse
-4. Check for 🏷️ or ⚙️ indicators (display name / default)
+4. Check for 🔖 or 🔧 indicators (display name / default)
 
 #### 10.3.3 Git Info Not Showing
 

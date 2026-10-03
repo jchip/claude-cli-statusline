@@ -61,23 +61,23 @@ Or with a custom config file:
 
 **Default (`"extend"` layout - single line):**
 ```
-📦 project-name 📁 relative/dir 🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K 🔍 Explore 💵 $0.05 ⏱️ 1h23m
+📦 project-name 📁 relative/dir 🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%📖200K 🔍 Explore 💵 $0.05 ⏳ 1h23m
 ```
 
 **Without sub-agent active:**
 ```
-📦 project-name 📁 relative/dir 🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K 💵 $0.05 ⏱️ 1h23m
+📦 project-name 📁 relative/dir 🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%📖200K 💵 $0.05 ⏳ 1h23m
 ```
 
 **With `"render-layout": "normal"` (basic info only):**
 ```
-📦 project-name 📁 relative/dir 🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K 🔍 Explore
+📦 project-name 📁 relative/dir 🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%📖200K 🔍 Explore
 ```
 
 **With `"render-layout": "layout-2-line"` (two lines):**
 ```
 📦 project-name 📁 relative/dir
-🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%⚡️200K 🔍 Explore
+🐙💎 ⎇ branch 🧠 Model ⏬ 89%✦67%📖200K 🔍 Explore
 ```
 
 **Icons:**
@@ -87,7 +87,7 @@ Or with a custom config file:
 - 📁 Current relative directory
 - 🐙 Git repo (octopus icon only by default)
   - 💎 Clean working tree (🟢 green) - no uncommitted changes
-  - 🛠️ Dirty working tree (🟡 yellow) - has uncommitted changes
+  - 🚧 Dirty working tree (🟡 yellow) - has uncommitted changes
   - 📤 Staged changes (🔵 light blue) - changes ready to commit
   - With `show-git-repo-name: true` in config:
     - `🐙💎 owner/repo-name` when the Claude CLI reports the remote (`workspace.repo`)
@@ -97,11 +97,11 @@ Or with a custom config file:
 - ⎇ Git branch (🟢 green if in repo, 🟡 yellow if no repo)
   - ∅ No git repository
 - 🧠 Model name
-- ⏬ Context display: `89%✦67%⚡️200K`
+- ⏬ Context display: `89%✦67%📖200K`
   - First percentage (89%): Total remaining context
   - ✦ separator
   - Second percentage (67%): Remaining before auto-compact (calculated as percentage of usable space after buffer)
-  - ⚡️ Not compacted or 💫 if context was compacted (auto or manual)
+  - 📖 Not compacted or 💫 if context was compacted (auto or manual)
   - Max context window (200K, 1M, etc.) with cyan-colored K/M suffix
 
 **Context Colors:**
@@ -121,15 +121,15 @@ The statusline supports an optional animated spinner with multiple style choices
 
 **Available spinner styles:**
 - `transportation` (default): 🚗 🚕 🚙 🚌 🚎 🚓 🚑 🚒
-- `weather`: ☀️ 🌤️ ⛅ 🌥️ ☁️ 🌦️ 🌧️ ⛈️
-- `hearts`: ❤️ 🧡 💛 💚 💙 💜 🖤 🤍
+- `weather`: 🌞 ⛅ ☔ 🌈 🌀 ⚡ ⛄ 🌊
+- `hearts`: 💖 🧡 💛 💚 💙 💜 🖤 🤍
 - `fruit`: 🍎 🍊 🍋 🍏 🫐 🍇 🍓 🍒
 - `planets`: 🌍 🪐 🌎 🌏 🌑 🌒 🌓 🌔
 - `circles`: 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫
 - `sports`: ⚽ 🏀 🏈 ⚾ 🎾 🏐 🏉 🎱
-- `flowers`: 🌹 🌺 🌻 🌼 🌷 🌸 💐 🏵️
-- `hands`: ✋ 🤚 🖐️ 👌 🤌 🤏
-- `arrows`: ➡️ ↗️ ⬆️ ↖️ ⬅️ ↙️ ⬇️ ↘️
+- `flowers`: 🌹 🌺 🌻 🌼 🌷 🌸 💐 💮
+- `hands`: ✋ 🤚 🖖 👌 🤌 🤏
+- `arrows`: → ↗ ↑ ↖ ← ↙ ↓ ↘
 - `moon`: 🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
 - `clock`: 🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛
 - `circular`: ◐ ◴ ◓ ◷ ◑ ◶ ◒ ◵
@@ -139,7 +139,7 @@ The statusline supports an optional animated spinner with multiple style choices
 
 **Example with animations (transportation):**
 ```
-🚗 75%✦52%⚡️200K🚌
+🚗 75%✦52%📖200K🚌
 ```
 
 **Enable animations in config:**
@@ -322,11 +322,11 @@ The statusline displays information through widgets that can be arranged using l
 | `model` | 🧠 | AI model name (e.g., "Sonnet 4.5") |
 | `context` | ⏬ | Context usage (remaining % before full/compact, max tokens) |
 | `subagent` | 🔍 | Currently active sub-agent (e.g., "Code-Reviewer", "Explore") |
-| `mode` | 🎚️ | Run modes: effort level, thinking (💭), fast mode (💨) — opt-in, not in the built-in layouts |
+| `mode` | 💪 | Run modes: effort level, thinking (💭), fast mode (💨) — opt-in, not in the built-in layouts |
 | `session` | 🌳/🔀/📌 | Session identity: worktree name, PR number, or session name — opt-in, not in the built-in layouts |
 | `cost` | 💵 | Total session cost in USD (cumulative across context resets) |
 | `lines` | 📝 | Lines added/removed during session (vanity metric, doesn't reset with context) |
-| `duration` | ⏱️ | Total session duration in hours/minutes (cumulative across context resets) |
+| `duration` | ⏳ | Total session duration in hours/minutes (cumulative across context resets) |
 | `spinner` | 🚗 | Animated activity spinner (only when `animations.enabled` is true); place it last so the animated glyph has no volatile fields to its right |
 
 **Note on metrics:**
@@ -402,7 +402,7 @@ A mapping of model display names to their context window sizes. Used as a fallba
 }
 ```
 
-When a context window is found via display name, it shows with a 🏷️ indicator: `⏬ 60%✦15%💫200K🏷️`
+When a context window is found via display name, it shows with a 🔖 indicator: `⏬ 60%✦15%💫200K🔖`
 
 ### `default-context-window`
 
@@ -410,7 +410,7 @@ The default context window size to use when neither model ID nor display name is
 
 **Default:** `200000` tokens
 
-When using the default, it shows with a ⚙️ indicator: `⏬ 60%✦15%💫200K⚙️`
+When using the default, it shows with a 🔧 indicator: `⏬ 60%✦15%💫200K🔧`
 
 ## Performance Optimizations
 
@@ -531,16 +531,18 @@ Customize the icons used to indicate git repository status (staged/clean/dirty).
 ```json
 {
   "clean": "💎",
-  "dirty": "🛠️",
+  "dirty": "🚧",
   "staged": "📤"
 }
 ```
 
 **Status combinations:**
 - Clean (no changes): `🐙💎` (octopus + gem in green)
-- Unstaged changes: `🐙🛠️` (octopus + tools in yellow)
+- Unstaged changes: `🐙🚧` (octopus + construction sign in yellow)
 - Staged changes: `🐙📤` (octopus + outbox in light blue)
-- Staged + unstaged: `🐙📤🛠️` (staged with additional unstaged changes)
+- Staged + unstaged: `🐙📤🚧` (staged with additional unstaged changes)
+
+**Tip:** Use single-codepoint icons only. See [Choosing Icons](#choosing-icons).
 
 **Example (using different icons):**
 
@@ -554,7 +556,7 @@ Customize the icons used to indicate git repository status (staged/clean/dirty).
 }
 ```
 
-**Note:** The icons are displayed directly adjacent to the octopus git icon (🐙) with no space between them. When there are staged changes, only the staged icon (📤) is shown. The dirty icon (🛠️) is only shown if there are unstaged changes. The clean icon (💎) is only shown when there are no changes at all (no staged, no unstaged).
+**Note:** The icons are displayed directly adjacent to the octopus git icon (🐙) with no space between them. When there are staged changes, only the staged icon (📤) is shown. The dirty icon (🚧) is only shown if there are unstaged changes. The clean icon (💎) is only shown when there are no changes at all (no staged, no unstaged).
 
 ### `render-layout`
 
@@ -672,8 +674,8 @@ balanced lines, for example:
 
 ```
 📦 claude-cli-statusline 📁 src/components
-🐙🛠️ ⎇ main 🧠 Opus 4.8 ⏬ 88%⚡️1M🚀
-💵 $1.23 📝 +120/−45 ⏱️ 1h
+🐙🚧 ⎇ main 🧠 Opus 4.8 ⏬ 88%📖1M🚀
+💵 $1.23 📝 +120/−45 ⏳ 1h
 ```
 
 **Note:** The `--auto-width=<columns>` CLI flag overrides this setting. Order of
@@ -746,6 +748,21 @@ bun coverage
 ### Building
 
 The project uses Bun as the runtime and doesn't require compilation. All TypeScript files are executed directly.
+
+### Choosing Icons
+
+Use only single-codepoint emoji that show as emoji by default, such as 📖, 🔧, ⏳.
+Plain 1-cell symbols like `→` or `✦` are fine too.
+
+Avoid these:
+
+- A text symbol plus the U+FE0F variation selector, such as ⚙️, ⏱️, 🛠️.
+- ZWJ sequences, such as 👨‍💻.
+
+Terminals draw these 2 cells wide but may move the cursor only 1 cell.
+The text after the icon then overlaps it until the terminal redraws.
+`test/icons.test.ts` fails if a built-in icon or spinner frame breaks this rule.
+The same rule applies to custom icons in `git-status-icons`.
 
 ### Contributing
 

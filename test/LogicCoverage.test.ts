@@ -36,7 +36,7 @@ describe("LogicCoverage", () => {
 
   test("ContextCalculator.selectCompactIcon", () => {
     expect(ContextCalculator.selectCompactIcon(true)).toBe("💫");
-    expect(ContextCalculator.selectCompactIcon(false)).toBe("⚡️");
+    expect(ContextCalculator.selectCompactIcon(false)).toBe("📖");
   });
 
   test("ContextCalculator.formatMaxTokens", () => {
@@ -139,8 +139,8 @@ describe("LogicCoverage", () => {
 
   test("ModelMatcher.getMatchIndicator", () => {
     expect(ModelMatcher.getMatchIndicator("model-id")).toBe("");
-    expect(ModelMatcher.getMatchIndicator("display-name")).toBe("🏷️");
-    expect(ModelMatcher.getMatchIndicator("default")).toBe("⚙️");
+    expect(ModelMatcher.getMatchIndicator("display-name")).toBe("🔖");
+    expect(ModelMatcher.getMatchIndicator("default")).toBe("🔧");
   });
 
   test("ModelMatcher.mapDisplayName with mapping", () => {

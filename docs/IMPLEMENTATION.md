@@ -112,9 +112,9 @@ Search order:
 
 Priority order:
 1. Model ID exact match → no indicator
-2. Display name match → 🏷️ indicator
-3. Mapped display name → 🏷️ indicator
-4. Default context window → ⚙️ indicator
+2. Display name match → 🔖 indicator
+3. Mapped display name → 🔖 indicator
+4. Default context window → 🔧 indicator
 
 ### Compact Detection
 
@@ -164,8 +164,8 @@ Context percentage thresholds (configurable):
 
 ```typescript
 🧠 Sonnet 4.5          // Matched by model ID
-🧠 Custom Model 🏷️     // Matched by display name (deprecated)
-🧠 Unknown Model ⚙️    // Using default (deprecated)
+🧠 Custom Model 🔖     // Matched by display name (deprecated)
+🧠 Unknown Model 🔧    // Using default (deprecated)
 ```
 
 - Maps display names (e.g., "1M context" → "4.5")
@@ -177,17 +177,17 @@ Context percentage thresholds (configurable):
 **Responsibility**: Calculate and display context usage
 
 ```typescript
-⏬ 89%✦67%⚡️200K      // Not compacted
-⏬ 45%✦22%💫1M🏷️      // Compacted, display name match
-⏬ 12%✦0%⚡️200K⚙️     // Default window
+⏬ 89%✦67%📖200K      // Not compacted
+⏬ 45%✦22%💫1M🔖      // Compacted, display name match
+⏬ 12%✦0%📖200K🔧     // Default window
 ```
 
 - First %: Total remaining
 - Second %: Remaining after compact buffer
-- ⚡️: Not compacted
+- 📖: Not compacted
 - 💫: Compacted (auto or manual)
-- 🏷️: Max tokens from display name
-- ⚙️: Max tokens from default
+- 🔖: Max tokens from display name
+- 🔧: Max tokens from default
 
 ## Testing
 

@@ -48,7 +48,7 @@
   "auto-wrap-width": 55,
   "git-status-icons": {
     "clean": "💎",
-    "dirty": "🛠️",
+    "dirty": "🚧",
     "staged": "📤"
   },
   "clear-model": true

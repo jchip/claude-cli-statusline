@@ -116,13 +116,13 @@ describe("ContextInfo", () => {
     expect(context.bufferColor).toBe("\x1b[32m"); // green for 72.5%
   });
 
-  test("shows ⚡️ icon when not compacted", () => {
+  test("shows 📖 icon when not compacted", () => {
     const context = new ContextInfo(50000, 200000, 45000, false, {
       green: 65,
       yellow: 45,
       orange: 20,
     });
-    expect(context.compactIcon).toBe("⚡️");
+    expect(context.compactIcon).toBe("📖");
   });
 
   test("shows 💫 icon when compacted", () => {
@@ -154,7 +154,7 @@ describe("ContextInfo", () => {
     expect(output).toContain("⏬");
     expect(output).toContain("75%");
     expect(output).toContain("✦");
-    expect(output).toContain("⚡️");
+    expect(output).toContain("📖");
     expect(output).toContain("200");
     expect(output).toContain("K");
   });
@@ -167,10 +167,10 @@ describe("ContextInfo", () => {
   });
 
   test("creates empty context with custom values", () => {
-    const context = ContextInfo.createEmpty(1000000, 50000, [70, 50, 25], "🏷️");
+    const context = ContextInfo.createEmpty(1000000, 50000, [70, 50, 25], "🔖");
     expect(context.maxTokens).toBe(1000000);
     expect(context.compactBuffer).toBe(50000);
-    expect(context.matchIndicator).toBe("🏷️");
+    expect(context.matchIndicator).toBe("🔖");
   });
 
   test("creates from data", () => {
@@ -180,11 +180,11 @@ describe("ContextInfo", () => {
       45000,
       true,
       [70, 50, 25],
-      "⚙️"
+      "🔧"
     );
     expect(context.usedTokens).toBe(100000);
     expect(context.compactOccurred).toBe(true);
-    expect(context.matchIndicator).toBe("⚙️");
+    expect(context.matchIndicator).toBe("🔧");
   });
 
   test("includes match indicator in render when present", () => {
@@ -194,10 +194,10 @@ describe("ContextInfo", () => {
       45000,
       false,
       { green: 65, yellow: 45, orange: 20 },
-      "🏷️"
+      "🔖"
     );
     const output = context.render();
-    expect(output).toContain("🏷️");
+    expect(output).toContain("🔖");
   });
 
   test("excludes match indicator in render when empty", () => {
@@ -210,8 +210,8 @@ describe("ContextInfo", () => {
       ""
     );
     const output = context.render();
-    expect(output).not.toContain("🏷️");
-    expect(output).not.toContain("⚙️");
+    expect(output).not.toContain("🔖");
+    expect(output).not.toContain("🔧");
   });
 
   test("shows warning icon when exceeds_200k_tokens is true", () => {
@@ -226,8 +226,8 @@ describe("ContextInfo", () => {
       true // exceeds200k
     );
     const output = context.render();
-    expect(output).toContain("⚠️");
-    expect(output).not.toContain("⚡️");
+    expect(output).toContain("❗");
+    expect(output).not.toContain("📖");
     expect(output).not.toContain("💫");
   });
 
@@ -243,8 +243,8 @@ describe("ContextInfo", () => {
       false // exceeds200k
     );
     const output = context.render();
-    expect(output).toContain("⚡️");
-    expect(output).not.toContain("⚠️");
+    expect(output).toContain("📖");
+    expect(output).not.toContain("❗");
     expect(output).not.toContain("💫");
   });
 
@@ -260,8 +260,8 @@ describe("ContextInfo", () => {
       true // exceeds200k - takes precedence
     );
     const output = context.render();
-    expect(output).toContain("⚠️");
-    expect(output).not.toContain("⚡️");
+    expect(output).toContain("❗");
+    expect(output).not.toContain("📖");
     expect(output).not.toContain("💫");
   });
 });

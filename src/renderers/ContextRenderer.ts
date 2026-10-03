@@ -39,7 +39,7 @@ export class ContextRenderer {
     // Only warn about 200K threshold when the model's context window is ≤200K
     // (flag is meaningless for 1M models where 200K is only 20% of capacity)
     const compactIcon = (data.exceeds200k && data.maxTokens <= 200000)
-      ? "⚠️"
+      ? "❗"
       : ContextCalculator.selectCompactIcon(data.compactOccurred);
     const maxTokensDisplay = ContextCalculator.formatMaxTokens(data.maxTokens);
 
