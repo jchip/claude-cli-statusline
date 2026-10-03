@@ -67,6 +67,19 @@ describe("visibleWidth", () => {
     expect(visibleWidth("↗")).toBe(1); // trend arrow
     expect(visibleWidth("◐")).toBe(1); // circular spinner frame
   });
+
+  test("counts text-default symbols as 1 cell", () => {
+    expect(visibleWidth("✦")).toBe(1); // context separator
+    expect(visibleWidth("89%✦67%")).toBe(7);
+    expect(visibleWidth("☀")).toBe(1);
+    expect(visibleWidth("☀️")).toBe(2); // + U+FE0F renders as emoji
+  });
+
+  test("counts emoji-presentation BMP symbols as 2 cells", () => {
+    expect(visibleWidth("⚡")).toBe(2);
+    expect(visibleWidth("⏳")).toBe(2);
+    expect(visibleWidth("⛅")).toBe(2);
+  });
 });
 
 describe("formatTokenCount", () => {

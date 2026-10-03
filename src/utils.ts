@@ -74,6 +74,7 @@ export function basename(path: string): string {
 
 // Matches ANSI SGR (color/style) escape sequences
 const ANSI_REGEX = /\x1b\[[0-9;]*m/g;
+const EMOJI_PRESENTATION = /\p{Emoji_Presentation}/u;
 
 /**
  * Determine the terminal cell width of a single code point.
@@ -91,16 +92,16 @@ function charWidth(cp: number): number {
     return 0;
   }
 
-  // Wide/emoji ranges (East Asian wide + emoji presentation)
+  // BMP symbols (⏰ ⚽ ✋ ⭐) are wide only with default emoji presentation.
+  // Text-default ones in the same blocks (✦ ☀ ➡) are 1 cell.
+  if (cp < 0x1f000 && EMOJI_PRESENTATION.test(String.fromCodePoint(cp))) {
+    return 2;
+  }
+
+  // Wide ranges (East Asian wide + supplementary emoji)
   if (
     (cp >= 0x1100 && cp <= 0x115f) || // Hangul Jamo
-    (cp >= 0x231a && cp <= 0x231b) || // watch, hourglass
     (cp >= 0x2329 && cp <= 0x232a) ||
-    (cp >= 0x23e9 && cp <= 0x23fa) || // clock/media (⏰ etc.)
-    (cp >= 0x25fd && cp <= 0x25fe) ||
-    (cp >= 0x2600 && cp <= 0x26ff) || // misc symbols (☀ ⚠ ⚽)
-    (cp >= 0x2700 && cp <= 0x27bf) || // dingbats (✋ ➡)
-    (cp >= 0x2b00 && cp <= 0x2bff) || // misc symbols & arrows (⬆ ⬇)
     (cp >= 0x2e80 && cp <= 0x303e) ||
     (cp >= 0x3041 && cp <= 0x33ff) ||
     (cp >= 0x3400 && cp <= 0x4dbf) ||
@@ -126,8 +127,13 @@ function charWidth(cp: number): number {
 export function visibleWidth(str: string): number {
   const clean = str.replace(ANSI_REGEX, "");
   let width = 0;
+  let prev = 0;
   for (const ch of clean) {
-    width += charWidth(ch.codePointAt(0)!);
+    const cp = ch.codePointAt(0)!;
+    const w = charWidth(cp);
+    // U+FE0F turns a narrow text symbol into a 2-cell emoji (☀ → ☀️)
+    width += cp === 0xfe0f && prev === 1 ? 1 : w;
+    prev = w;
   }
   return width;
 }
