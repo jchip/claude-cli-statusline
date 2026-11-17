@@ -1,6 +1,8 @@
 import { describe, test, expect } from "bun:test";
 import { GitService } from "../src/services/GitService.ts";
-import { writeFileSync, mkdirSync, rmSync, existsSync } from "fs";
+import { writeFileSync, mkdirSync, rmSync, existsSync, mkdtempSync, statSync, utimesSync } from "fs";
+import { spawnSync } from "child_process";
+import { tmpdir } from "os";
 import { join } from "path";
 
 describe("GitService", () => {
@@ -38,6 +40,38 @@ describe("GitService", () => {
   });
 
   describe("getGitStatus", () => {
+    test("never writes the index (no optional lock)", () => {
+      // A plain `git status` refreshes stale stat info and rewrites .git/index,
+      // taking .git/index.lock while it does. The status line runs constantly,
+      // so it must not take that lock and collide with the user's git commands.
+      const dir = mkdtempSync(join(tmpdir(), "statusline-lock-"));
+      try {
+        const git = (...args: string[]) => {
+          const env = { ...process.env };
+          delete env.GIT_OPTIONAL_LOCKS;
+          const r = spawnSync("git", ["-c", "user.name=t", "-c", "user.email=t@t", ...args], { cwd: dir, env });
+          expect(r.status).toBe(0);
+        };
+        git("init", "-q");
+        writeFileSync(join(dir, "a.txt"), "hello\n");
+        git("add", "a.txt");
+        git("commit", "-q", "-m", "init");
+        // Same content, older mtime: the index's stat info is now stale.
+        const past = new Date(Date.now() - 3600_000);
+        utimesSync(join(dir, "a.txt"), past, past);
+        const indexPath = join(dir, ".git", "index");
+        const before = statSync(indexPath).mtimeMs;
+
+        const status = GitService.getGitStatus(dir);
+
+        expect(status.isClean).toBe(true);
+        expect(statSync(indexPath).mtimeMs).toBe(before);
+        expect(existsSync(join(dir, ".git", "index.lock"))).toBe(false);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
     test("gets full status for valid git directory", () => {
       const status = GitService.getGitStatus(process.cwd());
       expect(status.branch).not.toBeNull();

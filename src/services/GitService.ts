@@ -131,10 +131,14 @@ export class GitService {
       // lets such a router pick the fast native git, and is equivalent to
       // `-C dir` for plain git. PWD is set explicitly because the router reads
       // it directly.
+      //
+      // GIT_OPTIONAL_LOCKS=0 stops `git status` from taking .git/index.lock to
+      // save a refreshed index. The status line runs constantly, so that lock
+      // would collide with the user's own git commands (add, commit, reset).
       const result = spawnSync(
         "git",
         ["status", "--porcelain=v2", "--branch"],
-        { cwd: dir, timeout: 5000, env: { ...process.env, PWD: dir } }
+        { cwd: dir, timeout: 5000, env: { ...process.env, PWD: dir, GIT_OPTIONAL_LOCKS: "0" } }
       );
 
       // status === 0 means git answered. Anything else (non-zero exit, ENOENT
